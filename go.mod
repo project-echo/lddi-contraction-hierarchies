@@ -1,4 +1,4 @@
-module github.com/LdDl/ch
+module github.com/project-echo/lddi-contraction-hierarchies
 
 go 1.13
 
