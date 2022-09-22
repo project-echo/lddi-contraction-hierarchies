@@ -134,32 +134,47 @@ func (graph *Graph) directionalSearchManyToMany(
 	prev map[int64]int64, estimates [][]float64, middleIDs [][]int64) {
 
 	vertex := heap.Pop(q).(*vertexDist)
-	// if vertex.dist <= *estimate { // TODO: move to another place
-	localProcessed[vertex.id] = true
-	// Edge relaxation in a forward propagation
-	var vertexList []*incidentEdge
+
+	maxEstimate := 0.0
 	if d == forward {
-		vertexList = graph.Vertices[vertex.id].outIncidentEdges
+		for _, estimate := range estimates[endpointIndex] {
+			if estimate > maxEstimate {
+				maxEstimate = estimate
+			}
+		}
 	} else {
-		vertexList = graph.Vertices[vertex.id].inIncidentEdges
-	}
-	for i := range vertexList {
-		temp := vertexList[i].vertexID
-		cost := vertexList[i].weight
-		if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
-			alt := localQueryDist[vertex.id] + cost
-			if localQueryDist[temp] > alt {
-				localQueryDist[temp] = alt
-				prev[temp] = vertex.id
-				node := &vertexDist{
-					id:   temp,
-					dist: alt,
-				}
-				heap.Push(q, node)
+		for _, targetEstimates := range estimates {
+			estimate := targetEstimates[endpointIndex]
+			if estimate > maxEstimate {
+				maxEstimate = estimate
 			}
 		}
 	}
-	// }
+	if vertex.dist <= maxEstimate {
+		localProcessed[vertex.id] = true
+		var vertexList []*incidentEdge
+		if d == forward {
+			vertexList = graph.Vertices[vertex.id].outIncidentEdges
+		} else {
+			vertexList = graph.Vertices[vertex.id].inIncidentEdges
+		}
+		for i := range vertexList {
+			temp := vertexList[i].vertexID
+			cost := vertexList[i].weight
+			if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
+				alt := localQueryDist[vertex.id] + cost
+				if localQueryDist[temp] > alt {
+					localQueryDist[temp] = alt
+					prev[temp] = vertex.id
+					node := &vertexDist{
+						id:   temp,
+						dist: alt,
+					}
+					heap.Push(q, node)
+				}
+			}
+		}
+	}
 	for revEndpointIdx, revEndpointProcessed := range reverseProcessed {
 		if revEndpointProcessed[vertex.id] {
 			var sourceEndpoint, targetEndpoint int
