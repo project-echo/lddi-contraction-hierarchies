@@ -168,11 +168,6 @@ func (graph *Graph) shortestPathCore(
 	return estimate, graph.ComputePath(middleID, forwardPrev, backwardPrev)
 }
 
-type VertexAlternative struct {
-	Label              int64
-	AdditionalDistance float64
-}
-
 // ShortestPathWithAlternatives Computes and returns shortest path and it's cost (extended Dijkstra's algorithm),
 // with multiple alternatives for source and target vertices with additional distances to reach the vertices
 // (useful if source and target are outside of the graph)
@@ -182,36 +177,18 @@ type VertexAlternative struct {
 // sources Source vertex alternatives
 // targets Target vertex alternatives
 func (graph *Graph) ShortestPathWithAlternatives(sources, targets []VertexAlternative) (float64, []int64) {
-	sourcesInternal := make([]vertexAlternativeInternal, 0, len(sources))
-	targetsInternal := make([]vertexAlternativeInternal, 0, len(targets))
-	for _, source := range sources {
-		sourceInternal := vertexAlternativeInternal{additionalDistance: source.AdditionalDistance}
-		var ok bool
-		if sourceInternal.vertexNum, ok = graph.mapping[source.Label]; !ok {
-			return -1.0, nil
-		}
-		sourcesInternal = append(sourcesInternal, sourceInternal)
-	}
-	for _, target := range targets {
-		targetInternal := vertexAlternativeInternal{additionalDistance: target.AdditionalDistance}
-		var ok bool
-		if targetInternal.vertexNum, ok = graph.mapping[target.Label]; !ok {
-			return -1.0, nil
-		}
-		targetsInternal = append(targetsInternal, targetInternal)
-	}
+	sourcesInternal := graph.vertexAlternativesToInternal(sources)
+	targetsInternal := graph.vertexAlternativesToInternal(targets)
 	return graph.shortestPathWithAlternatives(sourcesInternal, targetsInternal)
-}
-
-type vertexAlternativeInternal struct {
-	vertexNum          int64
-	additionalDistance float64
 }
 
 func (graph *Graph) shortestPathWithAlternatives(sources, targets []vertexAlternativeInternal) (float64, []int64) {
 	queryDist, revQueryDist, forwProcessed, revProcessed, forwQ, backwQ := graph.initShortestPath()
 
 	for _, source := range sources {
+		if source.vertexNum == vertexNotFound {
+			continue
+		}
 		forwProcessed[source.vertexNum] = true
 		queryDist[source.vertexNum] = source.additionalDistance
 		heapSource := &vertexDist{
@@ -221,6 +198,9 @@ func (graph *Graph) shortestPathWithAlternatives(sources, targets []vertexAltern
 		heap.Push(forwQ, heapSource)
 	}
 	for _, target := range targets {
+		if target.vertexNum == vertexNotFound {
+			continue
+		}
 		revProcessed[target.vertexNum] = true
 		revQueryDist[target.vertexNum] = target.additionalDistance
 		heapTarget := &vertexDist{
