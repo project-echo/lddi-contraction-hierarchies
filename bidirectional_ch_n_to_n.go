@@ -189,8 +189,8 @@ func (graph *Graph) ShortestPathManyToManyWithAlternatives(sources, targets [][]
 	var endpointsInternal [directionsCount][][]vertexAlternativeInternal
 	for d, directionEndpoints := range endpoints {
 		endpointsInternal[d] = make([][]vertexAlternativeInternal, 0, len(directionEndpoints))
-		for endpointIdx, alternatives := range directionEndpoints {
-			endpointsInternal[d][endpointIdx] = graph.vertexAlternativesToInternal(alternatives)
+		for _, alternatives := range directionEndpoints {
+			endpointsInternal[d] = append(endpointsInternal[d], graph.vertexAlternativesToInternal(alternatives))
 		}
 	}
 	return graph.shortestPathManyToManyWithAlternatives(endpointsInternal)
