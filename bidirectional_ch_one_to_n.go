@@ -4,14 +4,7 @@ import (
 	"container/heap"
 )
 
-func (graph *Graph) initShortestPathOneToMany() (
-	estimateAll []float64,
-	pathAll [][]int64,
-	prev map[int64]int64,
-	prevReverse map[int64]int64,
-	queryDist, revQueryDist []float64,
-	forwProcessed, revProcessed []int64,
-) {
+func (graph *Graph) initShortestPathOneToMany() (estimateAll []float64, pathAll [][]int64, prev map[int64]int64, prevReverse map[int64]int64, queryDist, revQueryDist []float64, forwProcessed, revProcessed []int64) {
 	estimateAll = []float64{}
 	pathAll = [][]int64{}
 
@@ -27,12 +20,12 @@ func (graph *Graph) initShortestPathOneToMany() (
 	return
 }
 
-// ShortestPathOneToMany Computes and returns shortest path and it's cost (extended Dijkstra's algorithm) for one-to-many relation
+// ShortestPathOneToMany computes and returns shortest paths and theirs's costs (extended Dijkstra's algorithm) between single source and multiple targets
 //
 // If there are some errors then function returns '-1.0' as cost and nil as shortest path
 //
-// source User's defined ID of source vertex
-// targets User's defined IDs for target vertices
+// source - user's definied ID of source vertex
+// targets - set of user's definied IDs of target vertices
 func (graph *Graph) ShortestPathOneToMany(source int64, targets []int64) ([]float64, [][]int64) {
 	estimateAll, pathAll, prev, prevReverse, queryDist, revQueryDist, forwProcessed, revProcessed := graph.initShortestPathOneToMany()
 
@@ -90,15 +83,7 @@ func (graph *Graph) ShortestPathOneToMany(source int64, targets []int64) ([]floa
 	return estimateAll, pathAll
 }
 
-func (graph *Graph) shortestPathOneToManyCore(
-	nextQueue int64,
-	prev map[int64]int64,
-	prevReverse map[int64]int64,
-	queryDist, revQueryDist []float64,
-	forwProcessed, revProcessed []int64,
-	forwQ *vertexDistHeap,
-	backwQ *vertexDistHeap,
-) (float64, []int64) {
+func (graph *Graph) shortestPathOneToManyCore(nextQueue int64, prev map[int64]int64, prevReverse map[int64]int64, queryDist, revQueryDist []float64, forwProcessed, revProcessed []int64, forwQ *vertexDistHeap, backwQ *vertexDistHeap) (float64, []int64) {
 	estimate := Infinity
 
 	var middleID int64
@@ -141,43 +126,23 @@ func (graph *Graph) shortestPathOneToManyCore(
 	return estimate, graph.ComputePath(middleID, prev, prevReverse)
 }
 
-// ShortestPathWithAlternatives Computes and returns shortest path and it's cost (extended Dijkstra's algorithm) for one-to-many relation
+// ShortestPathOneToManyWithAlternatives Computes and returns shortest path and it's cost (extended Dijkstra's algorithm) between single source and multiple targets
 // with multiple alternatives for source and target vertices with additional distances to reach the vertices
 // (useful if source and target are outside of the graph)
 //
 // If there are some errors then function returns '-1.0' as cost and nil as shortest path
 //
-// sourceAlternatives Source vertex alternatives
-// targetsAlternatives Target vertex alternatives
+// sourceAlternatives - user's definied ID of source vertex with additional penalty
+// targetsAlternatives - set of user's definied IDs of target vertices  with additional penalty
 func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []VertexAlternative, targetsAlternatives [][]VertexAlternative) ([]float64, [][]int64) {
 	estimateAll, pathAll, prev, prevReverse, queryDist, revQueryDist, forwProcessed, revProcessed := graph.initShortestPathOneToMany()
 
-	var sourceAlternativesInternal []vertexAlternativeInternal
-	for _, sourceAlternative := range sourceAlternatives {
-		var ok bool
-		sourceAlternativeInternal := vertexAlternativeInternal{additionalDistance: sourceAlternative.AdditionalDistance}
-		if sourceAlternativeInternal.vertexNum, ok = graph.mapping[sourceAlternative.Label]; !ok {
-			estimateAll = append(estimateAll, -1.0)
-			pathAll = append(pathAll, nil)
-			return estimateAll, pathAll
-		}
-		sourceAlternativesInternal = append(sourceAlternativesInternal, sourceAlternativeInternal)
-	}
+	sourceAlternativesInternal := graph.vertexAlternativesToInternal(sourceAlternatives)
 
 	for idx, targetAlternatives := range targetsAlternatives {
 		nextQueue := int64(idx) + 1
 
-		var targetAlternativesInternal []vertexAlternativeInternal
-		for _, targetAlternative := range targetAlternatives {
-			var ok bool
-			targetAlternativeInternal := vertexAlternativeInternal{additionalDistance: targetAlternative.AdditionalDistance}
-			if targetAlternativeInternal.vertexNum, ok = graph.mapping[targetAlternative.Label]; !ok {
-				estimateAll = append(estimateAll, -1.0)
-				pathAll = append(pathAll, nil)
-				continue
-			}
-			targetAlternativesInternal = append(targetAlternativesInternal, targetAlternativeInternal)
-		}
+		targetAlternativesInternal := graph.vertexAlternativesToInternal(targetAlternatives)
 
 		forwQ := &vertexDistHeap{}
 		backwQ := &vertexDistHeap{}
@@ -186,6 +151,9 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 		heap.Init(backwQ)
 
 		for _, sourceAlternative := range sourceAlternativesInternal {
+			if sourceAlternative.vertexNum == vertexNotFound {
+				continue
+			}
 			forwProcessed[sourceAlternative.vertexNum] = nextQueue
 			queryDist[sourceAlternative.vertexNum] = sourceAlternative.additionalDistance
 
@@ -196,6 +164,9 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 			heap.Push(forwQ, heapSource)
 		}
 		for _, targetAlternative := range targetAlternativesInternal {
+			if targetAlternative.vertexNum == vertexNotFound {
+				continue
+			}
 			revProcessed[targetAlternative.vertexNum] = nextQueue
 			revQueryDist[targetAlternative.vertexNum] = targetAlternative.additionalDistance
 
