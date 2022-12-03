@@ -1,9 +1,5 @@
 package ch
 
-import (
-	"container/heap"
-)
-
 // ShortestPathManyToMany computes and returns shortest paths and theirs's costs (extended Dijkstra's algorithm) between multiple sources and targets
 //
 // If there are some errors then function returns '-1.0' as cost and nil as shortest path
@@ -33,8 +29,6 @@ func (graph *Graph) initShortestPathManyToMany(endpointCounts [directionsCount]i
 			processed[d][endpointIdx] = make(map[int64]bool)
 
 			queues[d][endpointIdx] = &vertexDistHeap{}
-
-			heap.Init(queues[d][endpointIdx])
 		}
 	}
 	return
@@ -46,11 +40,11 @@ func (graph *Graph) shortestPathManyToMany(endpoints [directionsCount][]int64) (
 		for endpointIdx, endpoint := range endpoints[d] {
 			processed[d][endpointIdx][endpoint] = true
 			queryDist[d][endpointIdx].setVerticeDistance(endpoint, 0)
-			heapEndpoint := &vertexDist{
+			heapEndpoint := vertexDist{
 				id:   endpoint,
 				dist: 0,
 			}
-			heap.Push(queues[d][endpointIdx], heapEndpoint)
+			queues[d][endpointIdx].Push(heapEndpoint)
 		}
 	}
 	return graph.shortestPathManyToManyCore(queryDist, processed, queues)
@@ -77,22 +71,19 @@ func (graph *Graph) shortestPathManyToManyCore(queryDist [directionsCount][]vert
 		}
 	}
 
-	for {
-		queuesProcessed := false
+	for queuesProcessed := true; queuesProcessed; {
+		queuesProcessed = false
 		for d := forward; d < directionsCount; d++ {
 			reverseDirection := (d + 1) % directionsCount
 			for endpointIdx := range queues[d] {
-				if queues[d][endpointIdx].Len() == 0 {
-					continue
+				if queues[d][endpointIdx].Len() != 0 {
+					queuesProcessed = true
+					graph.directionalSearchManyToMany(d, endpointIdx, queues[d][endpointIdx], processed[d][endpointIdx], processed[reverseDirection], queryDist[d][endpointIdx], queryDist[reverseDirection], prev[d][endpointIdx], estimates, middleIDs)
 				}
-				queuesProcessed = true
-				graph.directionalSearchManyToMany(d, endpointIdx, queues[d][endpointIdx], processed[d][endpointIdx], processed[reverseDirection], queryDist[d][endpointIdx], queryDist[reverseDirection], prev[d][endpointIdx], estimates, middleIDs)
 			}
 		}
-		if !queuesProcessed {
-			break
-		}
 	}
+
 	paths := make([][][]int64, len(estimates))
 	for sourceEndpointIdx, targetEstimates := range estimates {
 		targetPaths := make([][]int64, len(targetEstimates))
@@ -100,9 +91,9 @@ func (graph *Graph) shortestPathManyToManyCore(queryDist [directionsCount][]vert
 		for targetEndpointIdx, estimate := range targetEstimates {
 			if estimate == Infinity {
 				targetEstimates[targetEndpointIdx] = -1
-				continue
+			} else {
+				targetPaths[targetEndpointIdx] = graph.ComputePath(middleIDs[sourceEndpointIdx][targetEndpointIdx], prev[forward][sourceEndpointIdx], prev[backward][targetEndpointIdx])
 			}
-			targetPaths[targetEndpointIdx] = graph.ComputePath(middleIDs[sourceEndpointIdx][targetEndpointIdx], prev[forward][sourceEndpointIdx], prev[backward][targetEndpointIdx])
 		}
 	}
 	return estimates, paths
@@ -114,7 +105,7 @@ func (graph *Graph) directionalSearchManyToMany(
 	localQueryDist verticesDistance, reverseQueryDist []verticesDistance,
 	prev map[int64]int64, estimates [][]float64, middleIDs [][]int64) {
 
-	vertex := heap.Pop(q).(*vertexDist)
+	vertex := q.Pop()
 	// if vertex.dist <= *estimate { // TODO: move to another place
 	localProcessed[vertex.id] = true
 	if graph.Reporter != nil {
@@ -135,11 +126,11 @@ func (graph *Graph) directionalSearchManyToMany(
 			if localQueryDist.getVerticeDistance(temp) > alt {
 				localQueryDist.setVerticeDistance(temp, alt)
 				prev[temp] = vertex.id
-				node := &vertexDist{
+				node := vertexDist{
 					id:   temp,
 					dist: alt,
 				}
-				heap.Push(q, node)
+				q.Push(node)
 				if graph.Reporter != nil {
 					graph.Reporter.EdgeRelaxed(int(d), endpointIndex, vertex.id, temp, true, q.Len())
 				}
@@ -196,11 +187,11 @@ func (graph *Graph) shortestPathManyToManyWithAlternatives(endpoints [directions
 				}
 				processed[d][endpointIdx][endpointAlternative.vertexNum] = true
 				queryDist[d][endpointIdx].setVerticeDistance(endpointAlternative.vertexNum, endpointAlternative.additionalDistance)
-				heapEndpoint := &vertexDist{
+				heapEndpoint := vertexDist{
 					id:   endpointAlternative.vertexNum,
 					dist: endpointAlternative.additionalDistance,
 				}
-				heap.Push(queues[d][endpointIdx], heapEndpoint)
+				queues[d][endpointIdx].Push(heapEndpoint)
 			}
 		}
 	}

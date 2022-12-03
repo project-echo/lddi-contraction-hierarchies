@@ -40,8 +40,12 @@ func MakeVertex(label int64) *Vertex {
 	return &Vertex{
 		Label:        label,
 		delNeighbors: 0,
-		distance:     NewDistance(),
-		contracted:   false,
+		distance: Distance{
+			previousOrderPos: -1,
+			previousSourceID: -1,
+			distance:         Infinity,
+		},
+		contracted: false,
 	}
 }
 
@@ -66,7 +70,9 @@ func (vertex *Vertex) bidirectedEdges() int {
 	for _, e := range vertex.inIncidentEdges {
 		hash[e.vertexID] = struct{}{}
 	}
+
 	ans := 0
+
 	for i := range vertex.outIncidentEdges {
 		if _, ok := hash[vertex.outIncidentEdges[i].vertexID]; ok {
 			ans++

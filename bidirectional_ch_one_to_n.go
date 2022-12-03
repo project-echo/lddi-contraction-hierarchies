@@ -1,9 +1,5 @@
 package ch
 
-import (
-	"container/heap"
-)
-
 func (graph *Graph) initShortestPathOneToMany() (estimateAll []float64, pathAll [][]int64, prev map[int64]int64, prevReverse map[int64]int64, queryDist, revQueryDist []float64, forwProcessed, revProcessed []int64) {
 	estimateAll = []float64{}
 	pathAll = [][]int64{}
@@ -59,20 +55,17 @@ func (graph *Graph) ShortestPathOneToMany(source int64, targets []int64) ([]floa
 		forwQ := &vertexDistHeap{}
 		backwQ := &vertexDistHeap{}
 
-		heap.Init(forwQ)
-		heap.Init(backwQ)
-
-		heapSource := &vertexDist{
+		heapSource := vertexDist{
 			id:   source,
 			dist: 0,
 		}
-		heapTarget := &vertexDist{
+		heapTarget := vertexDist{
 			id:   target,
 			dist: 0,
 		}
 
-		heap.Push(forwQ, heapSource)
-		heap.Push(backwQ, heapTarget)
+		forwQ.Push(heapSource)
+		backwQ.Push(heapTarget)
 
 		estimate, path := graph.shortestPathOneToManyCore(nextQueue, prev, prevReverse, queryDist, revQueryDist, forwProcessed, revProcessed, forwQ, backwQ)
 
@@ -90,7 +83,7 @@ func (graph *Graph) shortestPathOneToManyCore(nextQueue int64, prev map[int64]in
 
 	for forwQ.Len() != 0 || backwQ.Len() != 0 {
 		if forwQ.Len() != 0 {
-			vertex1 := heap.Pop(forwQ).(*vertexDist)
+			vertex1 := forwQ.Pop()
 			if vertex1.dist <= estimate {
 				forwProcessed[vertex1.id] = nextQueue
 				graph.relaxEdgesBiForwardOneToMany(vertex1, forwQ, prev, queryDist, nextQueue, forwProcessed)
@@ -104,7 +97,7 @@ func (graph *Graph) shortestPathOneToManyCore(nextQueue int64, prev map[int64]in
 		}
 
 		if backwQ.Len() != 0 {
-			vertex2 := heap.Pop(backwQ).(*vertexDist)
+			vertex2 := backwQ.Pop()
 			if vertex2.dist <= estimate {
 				revProcessed[vertex2.id] = nextQueue
 				graph.relaxEdgesBiBackwardOneToMany(vertex2, backwQ, prevReverse, revQueryDist, nextQueue, revProcessed)
@@ -147,9 +140,6 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 		forwQ := &vertexDistHeap{}
 		backwQ := &vertexDistHeap{}
 
-		heap.Init(forwQ)
-		heap.Init(backwQ)
-
 		for _, sourceAlternative := range sourceAlternativesInternal {
 			if sourceAlternative.vertexNum == vertexNotFound {
 				continue
@@ -157,11 +147,11 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 			forwProcessed[sourceAlternative.vertexNum] = nextQueue
 			queryDist[sourceAlternative.vertexNum] = sourceAlternative.additionalDistance
 
-			heapSource := &vertexDist{
+			heapSource := vertexDist{
 				id:   sourceAlternative.vertexNum,
 				dist: sourceAlternative.additionalDistance,
 			}
-			heap.Push(forwQ, heapSource)
+			forwQ.Push(heapSource)
 		}
 		for _, targetAlternative := range targetAlternativesInternal {
 			if targetAlternative.vertexNum == vertexNotFound {
@@ -170,11 +160,11 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 			revProcessed[targetAlternative.vertexNum] = nextQueue
 			revQueryDist[targetAlternative.vertexNum] = targetAlternative.additionalDistance
 
-			heapTarget := &vertexDist{
+			heapTarget := vertexDist{
 				id:   targetAlternative.vertexNum,
 				dist: targetAlternative.additionalDistance,
 			}
-			heap.Push(backwQ, heapTarget)
+			backwQ.Push(heapTarget)
 		}
 
 		estimate, path := graph.shortestPathOneToManyCore(nextQueue, prev, prevReverse, queryDist, revQueryDist, forwProcessed, revProcessed, forwQ, backwQ)
@@ -186,7 +176,7 @@ func (graph *Graph) ShortestPathOneToManyWithAlternatives(sourceAlternatives []V
 	return estimateAll, pathAll
 }
 
-func (graph *Graph) relaxEdgesBiForwardOneToMany(vertex *vertexDist, forwQ *vertexDistHeap, prev map[int64]int64, queryDist []float64, cid int64, forwProcessed []int64) {
+func (graph *Graph) relaxEdgesBiForwardOneToMany(vertex vertexDist, forwQ *vertexDistHeap, prev map[int64]int64, queryDist []float64, cid int64, forwProcessed []int64) {
 	vertexList := graph.Vertices[vertex.id].outIncidentEdges
 	for i := range vertexList {
 		temp := vertexList[i].vertexID
@@ -197,17 +187,17 @@ func (graph *Graph) relaxEdgesBiForwardOneToMany(vertex *vertexDist, forwQ *vert
 				queryDist[temp] = alt
 				prev[temp] = vertex.id
 				forwProcessed[temp] = cid
-				node := &vertexDist{
+				node := vertexDist{
 					id:   temp,
 					dist: alt,
 				}
-				heap.Push(forwQ, node)
+				forwQ.Push(node)
 			}
 		}
 	}
 }
 
-func (graph *Graph) relaxEdgesBiBackwardOneToMany(vertex *vertexDist, backwQ *vertexDistHeap, prev map[int64]int64, revQueryDist []float64, cid int64, revProcessed []int64) {
+func (graph *Graph) relaxEdgesBiBackwardOneToMany(vertex vertexDist, backwQ *vertexDistHeap, prev map[int64]int64, revQueryDist []float64, cid int64, revProcessed []int64) {
 	vertexList := graph.Vertices[vertex.id].inIncidentEdges
 	for i := range vertexList {
 		temp := vertexList[i].vertexID
@@ -218,11 +208,11 @@ func (graph *Graph) relaxEdgesBiBackwardOneToMany(vertex *vertexDist, backwQ *ve
 				revQueryDist[temp] = alt
 				prev[temp] = vertex.id
 				revProcessed[temp] = cid
-				node := &vertexDist{
+				node := vertexDist{
 					id:   temp,
 					dist: alt,
 				}
-				heap.Push(backwQ, node)
+				backwQ.Push(node)
 			}
 		}
 	}

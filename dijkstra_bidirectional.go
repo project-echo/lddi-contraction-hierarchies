@@ -1,7 +1,6 @@
 package ch
 
 import (
-	"container/heap"
 	"container/list"
 )
 
@@ -41,7 +40,6 @@ func (graph *Graph) initShortestPath() (queryDist [directionsCount][]float64, pr
 		}
 		processed[d] = make([]bool, len(graph.Vertices))
 		queues[d] = &vertexDistHeap{}
-		heap.Init(queues[d])
 	}
 	return
 }
@@ -51,11 +49,11 @@ func (graph *Graph) shortestPath(endpoints [directionsCount]int64) (float64, []i
 	for d := forward; d < directionsCount; d++ {
 		processed[d][endpoints[d]] = true
 		queryDist[d][endpoints[d]] = 0
-		heapEndpoint := &vertexDist{
+		heapEndpoint := vertexDist{
 			id:   endpoints[d],
 			dist: 0,
 		}
-		heap.Push(queues[d], heapEndpoint)
+		queues[d].Push(heapEndpoint)
 	}
 	return graph.shortestPathCore(queryDist, processed, queues)
 }
@@ -88,7 +86,7 @@ func (graph *Graph) shortestPathCore(queryDist [directionsCount][]float64, proce
 }
 
 func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProcessed, reverseProcessed []bool, localQueryDist, reverseQueryDist []float64, prev map[int64]int64, estimate *float64, middleID *int64) {
-	vertex := heap.Pop(q).(*vertexDist)
+	vertex := q.Pop()
 	if graph.Reporter != nil {
 		graph.Reporter.VertexSettled(int(d), 0, vertex.id, q.Len())
 	}
@@ -114,11 +112,11 @@ func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProce
 					}
 					localQueryDist[temp] = alt
 					prev[temp] = vertex.id
-					node := &vertexDist{
+					node := vertexDist{
 						id:   temp,
 						dist: alt,
 					}
-					heap.Push(q, node)
+					q.Push(node)
 				}
 			}
 		}
@@ -160,11 +158,12 @@ func (graph *Graph) shortestPathWithAlternatives(endpoints [directionsCount][]ve
 			}
 			processed[d][endpoint.vertexNum] = true
 			queryDist[d][endpoint.vertexNum] = endpoint.additionalDistance
-			heapEndpoint := &vertexDist{
+			heapEndpoint := vertexDist{
 				id:   endpoint.vertexNum,
 				dist: endpoint.additionalDistance,
 			}
-			heap.Push(queues[d], heapEndpoint)
+
+			queues[d].Push(heapEndpoint)
 		}
 	}
 	return graph.shortestPathCore(queryDist, processed, queues)

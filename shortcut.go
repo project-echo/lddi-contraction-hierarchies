@@ -6,7 +6,6 @@ package ch
 // To - ID of target vertex
 // ViaVertex - ID of vertex through which the shortcut exists
 // Cost - summary cost of path between two vertices
-//
 type ShortcutPath struct {
 	From int64
 	To   int64

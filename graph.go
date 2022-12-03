@@ -56,8 +56,12 @@ func (graph *Graph) CreateVertex(label int64) error {
 	v := Vertex{
 		Label:        label,
 		delNeighbors: 0,
-		distance:     NewDistance(),
-		contracted:   false,
+		distance: Distance{
+			previousOrderPos: -1,
+			previousSourceID: -1,
+			distance:         Infinity,
+		},
+		contracted: false,
 	}
 	if graph.mapping == nil {
 		graph.mapping = make(map[int64]int64)
@@ -106,24 +110,24 @@ func (graph *Graph) AddShortcut(from, to, via int64, weight float64) error {
 	if graph.frozen {
 		return ErrGraphIsFrozen
 	}
-	fromInternal := graph.mapping[from]
-	toInternal := graph.mapping[to]
-	viaInternal := graph.mapping[via]
-	if _, ok := graph.shortcuts[fromInternal]; !ok {
-		graph.shortcuts[fromInternal] = make(map[int64]*ShortcutPath)
-		graph.shortcuts[fromInternal][toInternal] = &ShortcutPath{
-			From: fromInternal,
-			To:   toInternal,
-			Via:  viaInternal,
-			Cost: weight,
-		}
-	}
-	graph.shortcuts[fromInternal][toInternal] = &ShortcutPath{
-		From: fromInternal,
-		To:   toInternal,
-		Via:  viaInternal,
+
+	scPath := &ShortcutPath{
+		From: graph.mapping[from],
+		To:   graph.mapping[to],
+		Via:  graph.mapping[via],
 		Cost: weight,
 	}
+
+	if scMap, ok := graph.shortcuts[scPath.From]; !ok {
+		m := map[int64]*ShortcutPath{
+			scPath.To: scPath,
+		}
+
+		graph.shortcuts[scPath.From] = m
+	} else {
+		scMap[scPath.To] = scPath
+	}
+
 	graph.shortcutsNum++
 	return nil
 }
