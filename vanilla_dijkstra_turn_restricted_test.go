@@ -48,16 +48,6 @@ func TestVanillaTurnRestrictedShortestPath(t *testing.T) {
 	restrictions[2] = make(map[int64]int64)
 	restrictions[2][5] = 7
 
-	for source, turn := range restrictions {
-		for via, target := range turn {
-			err := graph.AddTurnRestriction(source, via, target)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-		}
-	}
-
 	ans, path := graph.VanillaTurnRestrictedShortestPath(1, 5, restrictions)
 	rightPath := []int64{1, 2, 3, 4, 5}
 	if len(path) != 5 {
