@@ -13,11 +13,17 @@ import (
 // target User's definied ID of target vertex
 //
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64) (float64, []int64) {
-
+func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, restrictions map[int64]map[int64]int64) (float64, []int64) {
 	if source == target {
 		return 0, []int64{source}
 	}
+	// if default value is not overridden, use default restrictions of graph
+	if restrictions == nil {
+		restrictions = graph.restrictions
+	} else {
+		restrictions = graph.mapRestrictionAliasesToIndex(restrictions)
+	}
+
 	var ok bool
 
 	if source, ok = graph.mapping[source]; !ok {
@@ -57,7 +63,7 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64) (flo
 		// u ← Q.extract_min()
 		u := heap.Pop(Q).(*minHeapVertex)
 		destinationRestrictionID := int64(-1)
-		if restrictions, ok := graph.restrictions[prevNodeID]; ok {
+		if restrictions, ok := restrictions[prevNodeID]; ok {
 			// found some restrictions
 			destinationRestrictionID = restrictions[u.id]
 		}
@@ -134,4 +140,22 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64) (flo
 	}
 
 	return distance[target], usersLabelsPath
+}
+
+func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]int64) map[int64]map[int64]int64 {
+	output := make(map[int64]map[int64]int64, len(restrictions))
+
+	for source, turn := range restrictions {
+		mappedSource := graph.mapping[source]
+		if output[mappedSource] == nil {
+			output[mappedSource] = make(map[int64]int64)
+		}
+		for via, target := range turn {
+			mappedVia := graph.mapping[via]
+			mappedTarget := graph.mapping[target]
+			output[mappedSource][mappedVia] = mappedTarget
+		}
+	}
+
+	return output
 }

@@ -12,18 +12,23 @@ import (
 
 // ImportFromFile Imports graph (prepared by ExportToFile(fname string) function) from file of CSV-format
 // Header of CSV-file containing information about edges:
-// 		from_vertex_id - int64, ID of source vertex
-// 		to_vertex_id - int64, ID of arget vertex
-// 		weight - float64, Weight of an edge
+//
+//	from_vertex_id - int64, ID of source vertex
+//	to_vertex_id - int64, ID of arget vertex
+//	weight - float64, Weight of an edge
+//
 // Header of CSV-file containing information about vertices:
-// 		vertex_id - int64, ID of vertex
-// 		order_pos - int, Position of vertex in hierarchies (evaluted by library)
-// 		importance - int, Importance of vertex in graph (evaluted by library)
+//
+//	vertex_id - int64, ID of vertex
+//	order_pos - int, Position of vertex in hierarchies (evaluted by library)
+//	importance - int, Importance of vertex in graph (evaluted by library)
+//
 // Header of CSV-file containing information about shortcuts between vertices:
-// 		from_vertex_id - int64, ID of source vertex
-// 		to_vertex_id - int64, ID of target vertex
-// 		weight - float64, Weight of an shortcut
-// 		via_vertex_id - int64, ID of vertex through which the shortcut exists
+//
+//	from_vertex_id - int64, ID of source vertex
+//	to_vertex_id - int64, ID of target vertex
+//	weight - float64, Weight of an shortcut
+//	via_vertex_id - int64, ID of vertex through which the shortcut exists
 func ImportFromFile(edgesFname, verticesFname, contractionsFname string) (*Graph, error) {
 	// Read edges first
 	file, err := os.Open(edgesFname)
@@ -174,7 +179,6 @@ func ImportFromFile(edgesFname, verticesFname, contractionsFname string) (*Graph
 // Header of CSV-file:
 // from_vertex_id;via_vertex_id;to_vertex_id;
 // int;int;int
-//
 func (graph *Graph) ImportRestrictionsFromFile(fname string) error {
 	file, err := os.Open(fname)
 	if err != nil {
