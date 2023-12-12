@@ -20,6 +20,8 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	// if default value is not overridden, use default restrictions of graph
 	if restrictions == nil {
 		restrictions = graph.restrictions
+	} else {
+		restrictions = graph.mapRestrictionAliasesToIndex(restrictions)
 	}
 
 	var ok bool
@@ -138,4 +140,22 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	}
 
 	return distance[target], usersLabelsPath
+}
+
+func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]int64) map[int64]map[int64]int64 {
+	output := make(map[int64]map[int64]int64, len(restrictions))
+
+	for source, turn := range restrictions {
+		mappedSource := graph.mapping[source]
+		if output[mappedSource] == nil {
+			output[mappedSource] = make(map[int64]int64)
+		}
+		for via, target := range turn {
+			mappedVia := graph.mapping[via]
+			mappedTarget := graph.mapping[target]
+			output[mappedSource][mappedVia] = mappedTarget
+		}
+	}
+
+	return output
 }
