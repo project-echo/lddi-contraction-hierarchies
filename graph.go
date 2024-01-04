@@ -3,7 +3,6 @@ package ch
 import (
 	"container/heap"
 	"fmt"
-	"log"
 )
 
 // Graph Graph object
@@ -13,7 +12,7 @@ import (
 // shortcuts Found and stored shortcuts based on contraction hierarchies
 type Graph struct {
 	shortcuts    []map[int64]*ShortcutPath
-	restrictions map[int64]map[int64]int64
+	restrictions map[int64]map[int64]map[int64]bool
 	mapping      map[int64]int64
 
 	Vertices     []Vertex
@@ -39,7 +38,7 @@ func NewGraph() *Graph {
 		Vertices:     make([]Vertex, 0),
 		edgesNum:     0,
 		shortcutsNum: 0,
-		restrictions: make(map[int64]map[int64]int64),
+		restrictions: make(map[int64]map[int64]map[int64]bool),
 		frozen:       false,
 		verbose:      false,
 	}
@@ -217,15 +216,18 @@ func (graph *Graph) AddTurnRestriction(from, via, to int64) error {
 	to = graph.mapping[to]
 
 	if graph.restrictions == nil {
-		graph.restrictions = make(map[int64]map[int64]int64)
+		graph.restrictions = make(map[int64]map[int64]map[int64]bool)
 	}
 
 	if _, ok := graph.restrictions[from]; !ok {
-		graph.restrictions[from] = make(map[int64]int64)
-		if _, ok := graph.restrictions[from][via]; ok {
-			log.Printf("Warning: Please notice, library supports only one 'from-via' relation currently. From %d Via %d\n", from, via)
+		graph.restrictions[from] = make(map[int64]map[int64]bool)
+		toMap, ok := graph.restrictions[from][via]
+		if !ok {
+			toMap = make(map[int64]bool)
+			graph.restrictions[from][via] = toMap
 		}
-		graph.restrictions[from][via] = to
+		graph.restrictions[from][via][to] = true
 	}
+
 	return nil
 }

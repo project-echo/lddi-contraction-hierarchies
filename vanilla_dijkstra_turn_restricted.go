@@ -13,7 +13,7 @@ import (
 // target User's definied ID of target vertex
 //
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, restrictions map[int64]map[int64]int64) (float64, []int64) {
+func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, restrictions map[int64]map[int64]map[int64]bool) (float64, []int64) {
 	if source == target {
 		return 0, []int64{source}
 	}
@@ -62,10 +62,10 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	for Q.Len() != 0 {
 		// u ← Q.extract_min()
 		u := heap.Pop(Q).(*minHeapVertex)
-		destinationRestrictionID := int64(-1)
+		var destinationRestrictionIDs map[int64]bool
 		if restrictions, ok := restrictions[prevNodeID]; ok {
 			// found some restrictions
-			destinationRestrictionID = restrictions[u.id]
+			destinationRestrictionIDs = restrictions[u.id]
 		}
 
 		// if u == target:
@@ -85,7 +85,7 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 					continue
 				}
 			}
-			if neighbor == destinationRestrictionID {
+			if destinationRestrictionIDs[neighbor] {
 				// If there is a turn restriction
 				distance[u.id] = Infinity
 				continue
@@ -142,18 +142,25 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	return distance[target], usersLabelsPath
 }
 
-func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]int64) map[int64]map[int64]int64 {
-	output := make(map[int64]map[int64]int64, len(restrictions))
+func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]map[int64]bool) map[int64]map[int64]map[int64]bool {
+	output := make(map[int64]map[int64]map[int64]bool, len(restrictions))
 
 	for source, turn := range restrictions {
 		mappedSource := graph.mapping[source]
 		if output[mappedSource] == nil {
-			output[mappedSource] = make(map[int64]int64)
+			output[mappedSource] = make(map[int64]map[int64]bool)
 		}
 		for via, target := range turn {
 			mappedVia := graph.mapping[via]
-			mappedTarget := graph.mapping[target]
-			output[mappedSource][mappedVia] = mappedTarget
+			for targetID := range target {
+				mappedTarget := graph.mapping[targetID]
+				toMap, ok := output[mappedSource][mappedVia]
+				if !ok {
+					toMap = make(map[int64]bool)
+					output[mappedSource][mappedVia] = toMap
+				}
+				toMap[mappedTarget] = true
+			}
 		}
 	}
 
