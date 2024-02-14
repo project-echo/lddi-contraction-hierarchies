@@ -13,7 +13,7 @@ import (
 // target User's definied ID of target vertex
 //
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, restrictions map[int64]map[int64]map[int64]bool) (float64, []int64) {
+func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, restrictions map[int64]map[int64]bool) (float64, []int64) {
 	if source == target {
 		return 0, []int64{source}
 	}
@@ -57,16 +57,10 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	}
 	Q.add_with_priority(graph.Vertices[source].vertexNum, distance[graph.Vertices[source].vertexNum])
 	heap.Init(Q)
-	prevNodeID := int64(-1)
 	// while Q is not empty:
 	for Q.Len() != 0 {
 		// u ← Q.extract_min()
 		u := heap.Pop(Q).(*minHeapVertex)
-		var destinationRestrictionIDs map[int64]bool
-		if restrictions, ok := restrictions[prevNodeID]; ok {
-			// found some restrictions
-			destinationRestrictionIDs = restrictions[u.id]
-		}
 
 		// if u == target:
 		if u.id == target {
@@ -79,17 +73,20 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 		// for each neighbor v of u:
 		for v := range vertexList {
 			neighbor := vertexList[v].vertexID
-			if v1 := graph.shortcuts[u.id]; v1 != nil {
-				if _, ok2 := v1[neighbor]; ok2 {
-					// Ignore shortcut
+
+			if vertexList[v].isShortcut {
+				// Ignore shortcut
+				continue
+			}
+
+			if srcRestrictions, ok := restrictions[u.id]; ok {
+				if srcRestrictions[neighbor] {
+					// If there is a turn restriction
+					distance[u.id] = Infinity
 					continue
 				}
 			}
-			if destinationRestrictionIDs[neighbor] {
-				// If there is a turn restriction
-				distance[u.id] = Infinity
-				continue
-			}
+
 			cost := vertexList[v].weight
 			// alt ← dist[u] + length(u, v)
 			alt := distance[u.id] + cost
@@ -105,7 +102,6 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 			}
 		}
 
-		prevNodeID = u.id
 		// heap.Init(Q)
 	}
 
@@ -142,25 +138,17 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	return distance[target], usersLabelsPath
 }
 
-func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]map[int64]bool) map[int64]map[int64]map[int64]bool {
-	output := make(map[int64]map[int64]map[int64]bool, len(restrictions))
+func (graph *Graph) mapRestrictionAliasesToIndex(restrictions map[int64]map[int64]bool) map[int64]map[int64]bool {
+	output := make(map[int64]map[int64]bool, len(restrictions))
 
-	for source, turn := range restrictions {
+	for source, targets := range restrictions {
 		mappedSource := graph.mapping[source]
 		if output[mappedSource] == nil {
-			output[mappedSource] = make(map[int64]map[int64]bool)
+			output[mappedSource] = make(map[int64]bool)
 		}
-		for via, target := range turn {
-			mappedVia := graph.mapping[via]
-			for targetID := range target {
-				mappedTarget := graph.mapping[targetID]
-				toMap, ok := output[mappedSource][mappedVia]
-				if !ok {
-					toMap = make(map[int64]bool)
-					output[mappedSource][mappedVia] = toMap
-				}
-				toMap[mappedTarget] = true
-			}
+		for target := range targets {
+			mappedTarget := graph.mapping[target]
+			output[mappedSource][mappedTarget] = true
 		}
 	}
 

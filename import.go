@@ -211,7 +211,7 @@ func (graph *Graph) ImportRestrictionsFromFile(fname string) error {
 			return err
 		}
 
-		err = graph.AddTurnRestriction(sourceExternal, viaExternal, targetExternal)
+		err = graph.AddTurnRestriction(sourceExternal, targetExternal)
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("Can't add restriction between source_external_ID = '%d' and target_external_ID = '%d' via via_external_id = '%d'", sourceExternal, targetExternal, viaExternal))
 		}
