@@ -81,7 +81,6 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 			neighbor := vertexList[v].vertexID
 
 			if vertexList[v].isShortcut {
-				distance[u.id] = Infinity
 				// Ignore shortcut
 				continue
 			}
