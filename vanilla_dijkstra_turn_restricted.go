@@ -63,9 +63,9 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 		// u ← Q.extract_min()
 		u := heap.Pop(Q).(*minHeapVertex)
 		var destinationRestrictionIDs map[int64]bool
-		if restrictions, ok := restrictions[prevNodeID]; ok {
+		if nodeRestrictions, ok := restrictions[prevNodeID]; ok {
 			// found some restrictions
-			destinationRestrictionIDs = restrictions[u.id]
+			destinationRestrictionIDs = nodeRestrictions[u.id]
 		}
 
 		// if u == target:
@@ -79,12 +79,13 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 		// for each neighbor v of u:
 		for v := range vertexList {
 			neighbor := vertexList[v].vertexID
-			if v1 := graph.shortcuts[u.id]; v1 != nil {
-				if _, ok2 := v1[neighbor]; ok2 {
-					// Ignore shortcut
-					continue
-				}
+
+			if vertexList[v].isShortcut {
+				distance[u.id] = Infinity
+				// Ignore shortcut
+				continue
 			}
+
 			if destinationRestrictionIDs[neighbor] {
 				// If there is a turn restriction
 				distance[u.id] = Infinity

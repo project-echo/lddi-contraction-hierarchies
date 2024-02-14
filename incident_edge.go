@@ -2,24 +2,25 @@ package ch
 
 // incidentEdge incident edge for certain vertex
 type incidentEdge struct {
-	vertexID int64
-	weight   float64
+	vertexID   int64
+	weight     float64
+	isShortcut bool
 }
 
 // addInIncidentEdge Adds incident edge's to pool of "incoming" edges of given vertex.
 // Just an alias to append() function
 // incomingVertexID - Library defined ID of vertex
 // weight - Travel cost of incoming edge
-func (vertex *Vertex) addInIncidentEdge(incomingVertexID int64, weight float64) {
-	vertex.inIncidentEdges = append(vertex.inIncidentEdges, incidentEdge{incomingVertexID, weight})
+func (vertex *Vertex) addInIncidentEdge(incomingVertexID int64, weight float64, isShortcut bool) {
+	vertex.inIncidentEdges = append(vertex.inIncidentEdges, incidentEdge{incomingVertexID, weight, isShortcut})
 }
 
 // addOutIncidentEdge Adds incident edge's to pool of "outcoming" edges of given vertex.
 // Just an alias to append() function
 // outcomingVertexID - Library defined ID of vertex
 // weight - Travel cost of outcoming edge
-func (vertex *Vertex) addOutIncidentEdge(outcomingVertexID int64, weight float64) {
-	vertex.outIncidentEdges = append(vertex.outIncidentEdges, incidentEdge{outcomingVertexID, weight})
+func (vertex *Vertex) addOutIncidentEdge(outcomingVertexID int64, weight float64, isShortcut bool) {
+	vertex.outIncidentEdges = append(vertex.outIncidentEdges, incidentEdge{outcomingVertexID, weight, isShortcut})
 }
 
 // findInIncidentEdge Returns index of incoming incident edge by vertex ID

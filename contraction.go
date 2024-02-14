@@ -164,8 +164,9 @@ func (graph *Graph) createOrUpdateShortcut(fromVertex, toVertex, viaVertex int64
 			Via:  viaVertex,
 			Cost: summaryCost,
 		}
-		graph.Vertices[fromVertex].addOutIncidentEdge(toVertex, summaryCost)
-		graph.Vertices[toVertex].addInIncidentEdge(fromVertex, summaryCost)
+		graph.Vertices[fromVertex].addOutIncidentEdge(toVertex, summaryCost, true)
+		graph.Vertices[toVertex].addInIncidentEdge(fromVertex, summaryCost, true)
+
 		graph.shortcutsNum++
 	} else {
 		// If shortcut already exists
