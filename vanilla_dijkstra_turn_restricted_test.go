@@ -44,12 +44,6 @@ func TestVanillaTurnRestrictedShortestPath(t *testing.T) {
 	graph.PrepareContractionHierarchies()
 
 	restrictions := make(map[int64]map[int64]map[int64]bool)
-	// restrictions[1] = make(map[int64]map[int64]bool)
-	// restrictions[1][2] = map[int64]bool{5: true}
-	// restrictions[2] = make(map[int64]map[int64]bool)
-	// restrictions[2][3] = map[int64]bool{4: true}
-	// restrictions[2] = make(map[int64]map[int64]bool)
-	// restrictions[2][5] = map[int64]bool{7: true}
 
 	// empty restrictions must calculate the default shortest path
 	ans, path := graph.VanillaTurnRestrictedShortestPath(1, 5, restrictions)
