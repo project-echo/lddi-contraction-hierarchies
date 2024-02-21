@@ -30,7 +30,7 @@ func (graph *Graph) VanillaShortestPath(source, target int64) (float64, []int64)
 	}
 
 	// create vertex set Q
-	Q := &minHeap{}
+	Q := NewMinHeap()
 
 	// dist[source] ← 0
 	distance := make(map[int64]float64, len(graph.Vertices))
