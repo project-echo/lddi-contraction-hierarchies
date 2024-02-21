@@ -60,15 +60,15 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	// while Q is not empty:
 	for Q.Len() != 0 {
 		// u ← Q.extract_min()
-		u := heap.Pop(Q).(*minHeapVertex)
+		u := heap.Pop(Q).(*MinHeapVertex)
 
 		// if u == target:
-		if u.id == target {
+		if u.ID == target {
 			// break
 			break
 		}
 
-		vertexList := graph.Vertices[u.id].outIncidentEdges
+		vertexList := graph.Vertices[u.ID].outIncidentEdges
 
 		// for each neighbor v of u:
 		for v := range vertexList {
@@ -79,23 +79,23 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 				continue
 			}
 
-			if srcRestrictions, ok := restrictions[u.id]; ok {
+			if srcRestrictions, ok := restrictions[u.ID]; ok {
 				if srcRestrictions[neighbor] {
 					// If there is a turn restriction
-					distance[u.id] = Infinity
+					distance[u.ID] = Infinity
 					continue
 				}
 			}
 
 			cost := vertexList[v].weight
 			// alt ← dist[u] + length(u, v)
-			alt := distance[u.id] + cost
+			alt := distance[u.ID] + cost
 			// if alt < dist[v]
 			if distance[neighbor] > alt {
 				// dist[v] ← alt
 				distance[neighbor] = alt
 				// prev[v] ← u
-				prev[neighbor] = u.id
+				prev[neighbor] = u.ID
 				// Q.decrease_priority(v, alt)
 				// Q.decrease_priority(v, alt)
 				Q.add_with_priority(neighbor, alt)

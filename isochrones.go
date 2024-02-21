@@ -19,17 +19,17 @@ func (graph *Graph) Isochrones(source int64, maxCost float64) (map[int64]float64
 	Q := NewMinHeap()
 	heap.Init(Q)
 	distance := make(map[int64]float64, len(graph.Vertices))
-	Q.Push(&minHeapVertex{id: source, distance: 0})
+	Q.Push(&MinHeapVertex{ID: source, Distance: 0})
 	visit := make(map[int64]bool)
 	for Q.Len() != 0 {
-		next := heap.Pop(Q).(*minHeapVertex)
-		visit[next.id] = true
-		if next.distance <= maxCost {
-			distance[graph.Vertices[next.id].Label] = next.distance
-			vertexList := graph.Vertices[next.id].outIncidentEdges
+		next := heap.Pop(Q).(*MinHeapVertex)
+		visit[next.ID] = true
+		if next.Distance <= maxCost {
+			distance[graph.Vertices[next.ID].Label] = next.Distance
+			vertexList := graph.Vertices[next.ID].outIncidentEdges
 			for i := range vertexList {
 				neighbor := vertexList[i].vertexID
-				if v1 := graph.shortcuts[next.id]; v1 != nil {
+				if v1 := graph.shortcuts[next.ID]; v1 != nil {
 					if _, ok2 := v1[neighbor]; ok2 {
 						// Ignore shortcut
 						continue
@@ -37,11 +37,11 @@ func (graph *Graph) Isochrones(source int64, maxCost float64) (map[int64]float64
 				}
 				target := vertexList[i].vertexID
 				cost := vertexList[i].weight
-				alt := distance[graph.Vertices[next.id].Label] + cost
+				alt := distance[graph.Vertices[next.ID].Label] + cost
 				if visit[target] {
 					continue
 				}
-				Q.Push(&minHeapVertex{id: target, distance: alt})
+				Q.Push(&MinHeapVertex{ID: target, Distance: alt})
 			}
 		}
 	}

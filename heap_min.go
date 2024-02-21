@@ -2,57 +2,57 @@ package ch
 
 import "container/heap"
 
-type minHeapVertex struct {
-	id       int64
-	distance float64
+type MinHeapVertex struct {
+	ID       int64
+	Distance float64
 }
 
-type minHeap struct {
+type MinHeap struct {
 	ids       []int64
 	distances map[int64]float64
 }
 
-func NewMinHeap() *minHeap {
-	return &minHeap{
+func NewMinHeap() *MinHeap {
+	return &MinHeap{
 		ids:       make([]int64, 0),
 		distances: make(map[int64]float64),
 	}
 }
 
-func (h minHeap) Len() int { return len(h.ids) }
+func (h MinHeap) Len() int { return len(h.ids) }
 
-func (h minHeap) Less(i, j int) bool {
+func (h MinHeap) Less(i, j int) bool {
 	a := h.ids[i]
 	b := h.ids[j]
 	return h.distances[a] < h.distances[b]
 }
 
 // Min-Heap
-func (h minHeap) Swap(i, j int) { h.ids[i], h.ids[j] = h.ids[j], h.ids[i] }
+func (h MinHeap) Swap(i, j int) { h.ids[i], h.ids[j] = h.ids[j], h.ids[i] }
 
-func (h *minHeap) Push(x interface{}) {
-	hv := x.(*minHeapVertex)
-	if _, exists := h.distances[hv.id]; !exists {
-		h.ids = append(h.ids, hv.id)
+func (h *MinHeap) Push(x interface{}) {
+	hv := x.(*MinHeapVertex)
+	if _, exists := h.distances[hv.ID]; !exists {
+		h.ids = append(h.ids, hv.ID)
 	}
 
-	h.distances[hv.id] = hv.distance
+	h.distances[hv.ID] = hv.Distance
 }
 
-func (h *minHeap) Pop() interface{} {
+func (h *MinHeap) Pop() interface{} {
 	heapSize := len(h.ids)
 	lastNode := h.ids[heapSize-1]
 	lastDistance := h.distances[lastNode] // Capture the distance before deletion
 	h.ids = h.ids[:heapSize-1]
 	delete(h.distances, lastNode)
 
-	return &minHeapVertex{id: lastNode, distance: lastDistance} // Use the captured distance
+	return &MinHeapVertex{ID: lastNode, Distance: lastDistance} // Use the captured distance
 }
 
-func (h *minHeap) add_with_priority(id int64, val float64) {
-	nds := &minHeapVertex{
-		id:       id,
-		distance: val,
+func (h *MinHeap) add_with_priority(id int64, val float64) {
+	nds := &MinHeapVertex{
+		ID:       id,
+		Distance: val,
 	}
 	heap.Push(h, nds)
 }
