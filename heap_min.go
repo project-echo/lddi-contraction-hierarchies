@@ -41,11 +41,12 @@ func (h *minHeap) Push(x interface{}) {
 
 func (h *minHeap) Pop() interface{} {
 	heapSize := len(h.ids)
-	lastNode := (h.ids)[heapSize-1]
-	h.ids = (h.ids)[0 : heapSize-1]
+	lastNode := h.ids[heapSize-1]
+	lastDistance := h.distances[lastNode] // Capture the distance before deletion
+	h.ids = h.ids[:heapSize-1]
 	delete(h.distances, lastNode)
 
-	return &minHeapVertex{id: lastNode, distance: h.distances[lastNode]}
+	return &minHeapVertex{id: lastNode, distance: lastDistance} // Use the captured distance
 }
 
 func (h *minHeap) add_with_priority(id int64, val float64) {
