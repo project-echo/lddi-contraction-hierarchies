@@ -16,7 +16,7 @@ func (graph *Graph) Isochrones(source int64, maxCost float64) (map[int64]float64
 	if source, ok = graph.mapping[source]; !ok {
 		return nil, fmt.Errorf("no such source")
 	}
-	Q := NewMinHeap()
+	Q := &minHeap{}
 	heap.Init(Q)
 	distance := make(map[int64]float64, len(graph.Vertices))
 	Q.Push(&minHeapVertex{id: source, distance: 0})

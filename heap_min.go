@@ -7,46 +7,21 @@ type minHeapVertex struct {
 	distance float64
 }
 
-type minHeap struct {
-	ids       []int64
-	distances map[int64]float64
-}
+type minHeap []*minHeapVertex
 
-func NewMinHeap() *minHeap {
-	return &minHeap{
-		ids:       make([]int64, 0),
-		distances: make(map[int64]float64),
-	}
-}
-
-func (h minHeap) Len() int { return len(h.ids) }
-
-func (h minHeap) Less(i, j int) bool {
-	a := h.ids[i]
-	b := h.ids[j]
-	return h.distances[a] < h.distances[b]
-}
-
-// Min-Heap
-func (h minHeap) Swap(i, j int) { h.ids[i], h.ids[j] = h.ids[j], h.ids[i] }
+func (h minHeap) Len() int           { return len(h) }
+func (h minHeap) Less(i, j int) bool { return h[i].distance < h[j].distance } // Min-Heap
+func (h minHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 func (h *minHeap) Push(x interface{}) {
-	hv := x.(*minHeapVertex)
-	if _, exists := h.distances[hv.id]; !exists {
-		h.ids = append(h.ids, hv.id)
-	}
-
-	h.distances[hv.id] = hv.distance
+	*h = append(*h, x.(*minHeapVertex))
 }
 
 func (h *minHeap) Pop() interface{} {
-	heapSize := len(h.ids)
-	lastNode := h.ids[heapSize-1]
-	lastDistance := h.distances[lastNode] // Capture the distance before deletion
-	h.ids = h.ids[:heapSize-1]
-	delete(h.distances, lastNode)
-
-	return &minHeapVertex{id: lastNode, distance: lastDistance} // Use the captured distance
+	heapSize := len(*h)
+	lastNode := (*h)[heapSize-1]
+	*h = (*h)[0 : heapSize-1]
+	return lastNode
 }
 
 func (h *minHeap) add_with_priority(id int64, val float64) {
