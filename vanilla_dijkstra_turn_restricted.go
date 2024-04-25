@@ -36,7 +36,7 @@ func (graph *Graph) VanillaTurnRestrictedShortestPath(source, target int64, rest
 	}
 
 	// create vertex set Q
-	Q := NewMinHeap()
+	Q := &minHeap{}
 
 	// dist[source] ← 0
 	distance := make(map[int64]float64, len(graph.Vertices))
