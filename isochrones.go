@@ -19,28 +19,36 @@ func (graph *Graph) Isochrones(source int64, maxCost float64) (map[int64]float64
 	Q := &minHeap{}
 	heap.Init(Q)
 	distance := make(map[int64]float64, len(graph.Vertices))
+	distance[graph.Vertices[source].Label] = 0.0
 	Q.Push(&minHeapVertex{id: source, distance: 0})
 	visit := make(map[int64]bool)
 	for Q.Len() != 0 {
 		next := heap.Pop(Q).(*minHeapVertex)
+		if _, ex := visit[next.id]; ex {
+			// ignore nodes already visited with lower distance, as we don't update priority queue when a shorter path is found
+			continue
+		}
 		visit[next.id] = true
-		if next.distance <= maxCost {
-			distance[graph.Vertices[next.id].Label] = next.distance
-			vertexList := graph.Vertices[next.id].outIncidentEdges
-			for i := range vertexList {
-				neighbor := vertexList[i].vertexID
-				if v1 := graph.shortcuts[next.id]; v1 != nil {
-					if _, ok2 := v1[neighbor]; ok2 {
-						// Ignore shortcut
-						continue
-					}
-				}
-				target := vertexList[i].vertexID
-				cost := vertexList[i].weight
-				alt := distance[graph.Vertices[next.id].Label] + cost
-				if visit[target] {
+		vertexList := graph.Vertices[next.id].outIncidentEdges
+		for i := range vertexList {
+			neighbor := vertexList[i].vertexID
+			if v1 := graph.shortcuts[next.id]; v1 != nil {
+				if _, ok2 := v1[neighbor]; ok2 {
+					// Ignore shortcut
 					continue
 				}
+			}
+			target := vertexList[i].vertexID
+			cost := vertexList[i].weight
+			alt := distance[graph.Vertices[next.id].Label] + cost
+			if alt > maxCost {
+				continue
+			}
+			if visit[target] {
+				continue
+			}
+			if prevDistance, ex := distance[graph.Vertices[target].Label]; !ex || alt < prevDistance {
+				distance[graph.Vertices[target].Label] = alt
 				Q.Push(&minHeapVertex{id: target, distance: alt})
 			}
 		}

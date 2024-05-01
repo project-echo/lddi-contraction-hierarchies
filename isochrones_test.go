@@ -10,9 +10,9 @@ func TestIsochrones(t *testing.T) {
 		3: 1.0,
 		4: 1.0,
 		6: 1.0,
-		7: 3.0,
+		7: 2.0,
 		1: 3.0,
-		8: 4.0, // <---- Because of breadth-first search
+		8: 4.0,
 		9: 2.0,
 	}
 	graph := Graph{}
