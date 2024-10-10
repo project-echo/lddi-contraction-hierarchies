@@ -1,13 +1,146 @@
 goos: linux
 goarch: amd64
 pkg: github.com/LdDl/ch
-cpu: Intel(R) Core(TM) i5-10600K CPU @ 4.10GHz
-BenchmarkShortestPathOneToMany/CH_shortest_path/4/vertices-4-edges-9-shortcuts-1-12         	  370994	      3298 ns/op	    1725 B/op	      72 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/8/vertices-8-edges-61-shortcuts-1-12        	  169714	      7029 ns/op	    3409 B/op	     121 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/16/vertices-16-edges-316-shortcuts-31-12    	   51801	     24339 ns/op	    9912 B/op	     239 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/32/vertices-32-edges-1404-shortcuts-123-12  	   18261	     60482 ns/op	   24182 B/op	     432 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/64/vertices-64-edges-5894-shortcuts-322-12  	    7291	    159670 ns/op	   55777 B/op	     844 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/128/vertices-128-edges-23977-shortcuts-1315-12         	    2350	    493555 ns/op	  124457 B/op	    1725 allocs/op
-BenchmarkShortestPathOneToMany/CH_shortest_path/256/vertices-256-edges-97227-shortcuts-5276-12         	     870	   1409281 ns/op	  271506 B/op	    3646 allocs/op
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+BenchmarkShortestPathManyToMany
+    bidirectional_ch_n_to_n_test.go:51: BenchmarkShortestPathManyToMany is starting...
+BenchmarkShortestPathManyToMany/CH_shortest_path/4/vertices-4-edges-9
+BenchmarkShortestPathManyToMany/CH_shortest_path/4/vertices-4-edges-9-4         	  265184	      5048 ns/op	    4706 B/op	      94 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/8/vertices-8-edges-61
+BenchmarkShortestPathManyToMany/CH_shortest_path/8/vertices-8-edges-61-4        	  142627	      9944 ns/op	    5550 B/op	     126 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/16/vertices-16-edges-316
+BenchmarkShortestPathManyToMany/CH_shortest_path/16/vertices-16-edges-316-4     	   27038	     52477 ns/op	   11586 B/op	     214 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/32/vertices-32-edges-1404
+BenchmarkShortestPathManyToMany/CH_shortest_path/32/vertices-32-edges-1404-4    	    7273	    172890 ns/op	   25437 B/op	     388 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/64/vertices-64-edges-5894
+BenchmarkShortestPathManyToMany/CH_shortest_path/64/vertices-64-edges-5894-4    	    1798	    728115 ns/op	   54902 B/op	     751 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/128/vertices-128-edges-23977
+BenchmarkShortestPathManyToMany/CH_shortest_path/128/vertices-128-edges-23977-4 	     421	   3601751 ns/op	  117420 B/op	    1509 allocs/op
+BenchmarkShortestPathManyToMany/CH_shortest_path/256/vertices-256-edges-97227
+BenchmarkShortestPathManyToMany/CH_shortest_path/256/vertices-256-edges-97227-4 	     100	  13581197 ns/op	  247930 B/op	    3091 allocs/op
+BenchmarkOldWayShortestPathManyToMany
+    bidirectional_ch_n_to_n_test.go:79: BenchmarkOldWayShortestPathManyToMany is starting...
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/4/vertices-4-edges-9
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/4/vertices-4-edges-9-4   	  355909	      3764 ns/op	    2694 B/op	      79 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/8/vertices-8-edges-61
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/8/vertices-8-edges-61-4  	  170624	      6937 ns/op	    4499 B/op	     131 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/16/vertices-16-edges-316
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/16/vertices-16-edges-316-4         	   57804	     23081 ns/op	   10471 B/op	     249 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/32/vertices-32-edges-1404
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/32/vertices-32-edges-1404-4        	   21840	     53631 ns/op	   23560 B/op	     440 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/64/vertices-64-edges-5894
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/64/vertices-64-edges-5894-4        	    9103	    156443 ns/op	   52415 B/op	     851 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/128/vertices-128-edges-23977
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/128/vertices-128-edges-23977-4     	    3414	    452672 ns/op	  113697 B/op	    1736 allocs/op
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/256/vertices-256-edges-97227
+BenchmarkOldWayShortestPathManyToMany/CH_shortest_path/256/vertices-256-edges-97227-4     	    1329	    951075 ns/op	  243206 B/op	    3620 allocs/op
+BenchmarkStaticCaseShortestPathManyToMany
+    bidirectional_ch_n_to_n_test.go:114: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_n_to_n_test.go:116: BenchmarkStaticCaseShortestPathManyToMany is starting...
+BenchmarkStaticCaseShortestPathManyToMany/CH_shortest_path_(many_to_many)/vertices-187853
+BenchmarkStaticCaseShortestPathManyToMany/CH_shortest_path_(many_to_many)/vertices-187853-4         	     250	   5269717 ns/op	  552898 B/op	    8509 allocs/op
+BenchmarkStaticCaseOldWayShortestPathManyToMany
+    bidirectional_ch_n_to_n_test.go:135: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_n_to_n_test.go:137: BenchmarkStaticCaseOldWayShortestPathManyToMany is starting...
+BenchmarkStaticCaseOldWayShortestPathManyToMany/CH_shortest_path_(many_to_many)/vertices-187853
+BenchmarkStaticCaseOldWayShortestPathManyToMany/CH_shortest_path_(many_to_many)/vertices-187853-4   	     190	   6461175 ns/op	17384972 B/op	    9236 allocs/op
+BenchmarkShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:41: BenchmarkShortestPathOneToMany is starting...
+BenchmarkShortestPathOneToMany/CH_shortest_path/4/vertices-4-edges-9
+BenchmarkShortestPathOneToMany/CH_shortest_path/4/vertices-4-edges-9-4                              	  383047	      3428 ns/op	    1850 B/op	      63 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/8/vertices-8-edges-61
+BenchmarkShortestPathOneToMany/CH_shortest_path/8/vertices-8-edges-61-4                             	  198049	      6109 ns/op	    3160 B/op	     109 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/16/vertices-16-edges-316
+BenchmarkShortestPathOneToMany/CH_shortest_path/16/vertices-16-edges-316-4                          	   55136	     19735 ns/op	    7544 B/op	     222 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/32/vertices-32-edges-1404
+BenchmarkShortestPathOneToMany/CH_shortest_path/32/vertices-32-edges-1404-4                         	   25240	     47005 ns/op	   15627 B/op	     395 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/64/vertices-64-edges-5894
+BenchmarkShortestPathOneToMany/CH_shortest_path/64/vertices-64-edges-5894-4                         	   10000	    129006 ns/op	   33645 B/op	     777 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/128/vertices-128-edges-23977
+BenchmarkShortestPathOneToMany/CH_shortest_path/128/vertices-128-edges-23977-4                      	    3733	    347760 ns/op	   72701 B/op	    1629 allocs/op
+BenchmarkShortestPathOneToMany/CH_shortest_path/256/vertices-256-edges-97227
+BenchmarkShortestPathOneToMany/CH_shortest_path/256/vertices-256-edges-97227-4                      	    1404	    956109 ns/op	  158220 B/op	    3469 allocs/op
+BenchmarkOldWayShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:69: BenchmarkOldWayShortestPathOneToMany is starting...
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/4/vertices-4-edges-9
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/4/vertices-4-edges-9-4                        	  372908	      3712 ns/op	    2692 B/op	      79 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/8/vertices-8-edges-61
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/8/vertices-8-edges-61-4                       	  186793	      6649 ns/op	    4499 B/op	     131 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/16/vertices-16-edges-316
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/16/vertices-16-edges-316-4                    	   58118	     22151 ns/op	   10473 B/op	     249 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/32/vertices-32-edges-1404
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/32/vertices-32-edges-1404-4                   	   21352	     55662 ns/op	   23566 B/op	     440 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/64/vertices-64-edges-5894
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/64/vertices-64-edges-5894-4                   	    8746	    156487 ns/op	   52394 B/op	     850 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/128/vertices-128-edges-23977
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/128/vertices-128-edges-23977-4                	    3181	    402518 ns/op	  113590 B/op	    1735 allocs/op
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/256/vertices-256-edges-97227
+BenchmarkOldWayShortestPathOneToMany/CH_shortest_path/256/vertices-256-edges-97227-4                	    1394	    983159 ns/op	  243927 B/op	    3630 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:104: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_one_to_n_test.go:106: BenchmarkTargetNodesShortestPathOneToMany is starting...
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/2/vertices-187853-edges-366113-targets-1
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/2/vertices-187853-edges-366113-targets-1-4         	     751	   1632727 ns/op	 6143061 B/op	    2487 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/4/vertices-187853-edges-366113-targets-4
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/4/vertices-187853-edges-366113-targets-4-4         	     492	   2505222 ns/op	 6260389 B/op	    6766 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/8/vertices-187853-edges-366113-targets-2
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/8/vertices-187853-edges-366113-targets-2-4         	     636	   1576009 ns/op	 6130594 B/op	    2309 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/16/vertices-187853-edges-366113-targets-11
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/16/vertices-187853-edges-366113-targets-11-4       	     240	   5378900 ns/op	 6534342 B/op	   15286 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/32/vertices-187853-edges-366113-targets-1
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/32/vertices-187853-edges-366113-targets-1-4        	     913	   1573161 ns/op	 6098484 B/op	    1379 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/64/vertices-187853-edges-366113-targets-34
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/64/vertices-187853-edges-366113-targets-34-4       	      64	  16664304 ns/op	 7674515 B/op	   53138 allocs/op
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/128/vertices-187853-edges-366113-targets-63
+BenchmarkTargetNodesShortestPathOneToMany/CH_shortest_path/128/vertices-187853-edges-366113-targets-63-4      	      40	  29800640 ns/op	 8951310 B/op	   97521 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:133: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_one_to_n_test.go:135: BenchmarkTargetNodesShortestPathOneToMany is starting...
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/2/vertices-187853-edges-366113-targets-1
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/2/vertices-187853-edges-366113-targets-1-4   	     891	   1366750 ns/op	 3505633 B/op	    2489 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/4/vertices-187853-edges-366113-targets-4
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/4/vertices-187853-edges-366113-targets-4-4   	     258	   4786412 ns/op	13863137 B/op	    6910 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/8/vertices-187853-edges-366113-targets-2
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/8/vertices-187853-edges-366113-targets-2-4   	     559	   2021097 ns/op	 6901189 B/op	    2354 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/16/vertices-187853-edges-366113-targets-11
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/16/vertices-187853-edges-366113-targets-11-4 	     100	  12695191 ns/op	38044771 B/op	   15773 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/32/vertices-187853-edges-366113-targets-1
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/32/vertices-187853-edges-366113-targets-1-4  	    1143	   1072236 ns/op	 3461004 B/op	    1380 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/64/vertices-187853-edges-366113-targets-34
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/64/vertices-187853-edges-366113-targets-34-4 	      31	  40038610 ns/op	117897465 B/op	   54963 allocs/op
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/128/vertices-187853-edges-366113-targets-63
+BenchmarkTargetNodesOldWayShortestPathOneToMany/CH_shortest_path/128/vertices-187853-edges-366113-targets-63-4         	      18	  72371081 ns/op	218374848 B/op	  100894 allocs/op
+BenchmarkStaticCaseShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:164: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_one_to_n_test.go:166: BenchmarkStaticCaseShortestPathOneToMany is starting...
+BenchmarkStaticCaseShortestPathOneToMany/CH_shortest_path_(one_to_many)/vertices-187853-edges-366113
+BenchmarkStaticCaseShortestPathOneToMany/CH_shortest_path_(one_to_many)/vertices-187853-edges-366113-4                 	     325	   3341928 ns/op	 6337256 B/op	    9023 allocs/op
+BenchmarkStaticCaseOldWayShortestPathOneToMany
+    bidirectional_ch_one_to_n_test.go:185: Please wait until contraction hierarchy is prepared
+    bidirectional_ch_one_to_n_test.go:187: BenchmarkStaticCaseOldWayShortestPathOneToMany is starting...
+BenchmarkStaticCaseOldWayShortestPathOneToMany/CH_shortest_path_(one_to_many)/vertices-187853-edges-366113
+BenchmarkStaticCaseOldWayShortestPathOneToMany/CH_shortest_path_(one_to_many)/vertices-187853-edges-366113-4           	     189	   6728075 ns/op	17384946 B/op	    9237 allocs/op
+BenchmarkShortestPath
+    bidirectional_ch_test.go:71: BenchmarkShortestPath is starting...
+BenchmarkShortestPath/CH_shortest_path/4/vertices-4-edges-9
+BenchmarkShortestPath/CH_shortest_path/4/vertices-4-edges-9-4                                                          	 1431063	       755.4 ns/op	     539 B/op	      16 allocs/op
+BenchmarkShortestPath/CH_shortest_path/8/vertices-8-edges-61
+BenchmarkShortestPath/CH_shortest_path/8/vertices-8-edges-61-4                                                         	  941155	      1531 ns/op	     900 B/op	      26 allocs/op
+BenchmarkShortestPath/CH_shortest_path/16/vertices-16-edges-316
+BenchmarkShortestPath/CH_shortest_path/16/vertices-16-edges-316-4                                                      	  259340	      4749 ns/op	    2095 B/op	      49 allocs/op
+BenchmarkShortestPath/CH_shortest_path/32/vertices-32-edges-1404
+BenchmarkShortestPath/CH_shortest_path/32/vertices-32-edges-1404-4                                                     	  109023	     11090 ns/op	    4719 B/op	      88 allocs/op
+BenchmarkShortestPath/CH_shortest_path/64/vertices-64-edges-5894
+BenchmarkShortestPath/CH_shortest_path/64/vertices-64-edges-5894-4                                                     	   41290	     30173 ns/op	   10488 B/op	     170 allocs/op
+BenchmarkShortestPath/CH_shortest_path/128/vertices-128-edges-23977
+BenchmarkShortestPath/CH_shortest_path/128/vertices-128-edges-23977-4                                                  	   14446	     86951 ns/op	   22883 B/op	     348 allocs/op
+BenchmarkShortestPath/CH_shortest_path/256/vertices-256-edges-97227
+BenchmarkShortestPath/CH_shortest_path/256/vertices-256-edges-97227-4                                                  	    5852	    214872 ns/op	   48470 B/op	     719 allocs/op
+BenchmarkStaticCaseShortestPath
+    bidirectional_ch_test.go:93: BenchmarkStaticCaseShortestPath is starting...
+BenchmarkStaticCaseShortestPath/CH_shortest_path/vertices-187853-edges-366113
+BenchmarkStaticCaseShortestPath/CH_shortest_path/vertices-187853-edges-366113-4                                        	    1290	   1168353 ns/op	 3451199 B/op	    1022 allocs/op
+BenchmarkPrepareContracts
+BenchmarkPrepareContracts-4                                                                                            	       1	3573611379 ns/op	291904768 B/op	 2572192 allocs/op
 PASS
-ok  	github.com/LdDl/ch	70.487s
+ok  	github.com/LdDl/ch	292.266s
