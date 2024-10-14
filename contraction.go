@@ -66,16 +66,7 @@ func (graph *Graph) contractNode(vertex *Vertex) {
 	graph.markNeighbors(incomingEdges, outcomingEdges)
 
 	// For every vertex 'w' in W, compute Pw as the cost from 'u' to 'w' through current vertex, which is the sum of the edge weights w(u, vertex) + w(vertex, w).
-	inMax := 0.0
 	outMax := 0.0
-	for i := range incomingEdges {
-		if graph.Vertices[incomingEdges[i].vertexID].contracted {
-			continue
-		}
-		if inMax < incomingEdges[i].weight {
-			inMax = incomingEdges[i].weight
-		}
-	}
 	for i := range outcomingEdges {
 		if graph.Vertices[outcomingEdges[i].vertexID].contracted {
 			continue
@@ -85,17 +76,16 @@ func (graph *Graph) contractNode(vertex *Vertex) {
 		}
 	}
 	// Then Pmax is the maximum pMax over all 'w' in W.
-	pmax := inMax + outMax
 
 	// Perform a standard Dijkstra’s shortest path search from 'u' on the subgraph excluding current vertex.
-	graph.processIncidentEdges(vertex, pmax)
+	graph.processIncidentEdges(vertex, outMax)
 }
 
 // processIncidentEdges Returns evaluated shorcuts
 //
 // vertex - Vertex for making possible shortcuts around
 // pmax - path cost restriction
-func (graph *Graph) processIncidentEdges(vertex *Vertex, pmax float64) {
+func (graph *Graph) processIncidentEdges(vertex *Vertex, outMax float64) {
 	incomingEdges := vertex.inIncidentEdges
 	outcomingEdges := vertex.outIncidentEdges
 	if len(outcomingEdges) == 0 {
@@ -112,6 +102,7 @@ func (graph *Graph) processIncidentEdges(vertex *Vertex, pmax float64) {
 			continue
 		}
 		inCost := u.weight
+		pmax := inCost + outMax
 		graph.shortestPathsWithMaxCost(inVertex, pmax, previousOrderPos) // Finds the shortest distances from the inVertex to all outVertices.
 		for _, w := range outcomingEdges {
 			outVertex := w.vertexID
