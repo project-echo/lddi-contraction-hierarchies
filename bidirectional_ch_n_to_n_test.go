@@ -58,7 +58,7 @@ func BenchmarkShortestPathManyToMany(b *testing.B) {
 			return
 		}
 		b.ResetTimer()
-		b.Run(fmt.Sprintf("%s/%d/vertices-%d-edges-%d-shortcuts-%d", "CH shortest path", n, len(g.Vertices), g.GetEdgesNum(), g.GetShortcutsNum()), func(b *testing.B) {
+		b.Run(fmt.Sprintf("%s/%d/vertices-%d-edges-%d", "CH shortest path", n, len(g.Vertices), g.GetEdgesNum()), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				u := []int64{int64(rand.Intn(len(g.Vertices)))}
 				v := []int64{
@@ -86,7 +86,7 @@ func BenchmarkOldWayShortestPathManyToMany(b *testing.B) {
 			return
 		}
 		b.ResetTimer()
-		b.Run(fmt.Sprintf("%s/%d/vertices-%d-edges-%d-shortcuts-%d", "CH shortest path", n, len(g.Vertices), g.GetEdgesNum(), g.GetShortcutsNum()), func(b *testing.B) {
+		b.Run(fmt.Sprintf("%s/%d/vertices-%d-edges-%d", "CH shortest path", n, len(g.Vertices), g.GetEdgesNum()), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				u := int64(rand.Intn(len(g.Vertices)))
 				v := []int64{
