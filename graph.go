@@ -165,14 +165,14 @@ func (graph *Graph) SetVerbose(flag bool) {
 
 // computeImportance Returns heap to store computed importance of each vertex
 func (graph *Graph) computeImportance() *importanceHeap {
-	pqImportance := &importanceHeap{}
-	heap.Init(pqImportance)
+	pqImportance := make(importanceHeap, 0, len(graph.Vertices))
 	for i := range graph.Vertices {
 		graph.Vertices[i].computeImportance()
-		heap.Push(pqImportance, &graph.Vertices[i])
+		pqImportance.Push(&graph.Vertices[i])
 	}
+	heap.Init(&pqImportance)
 	graph.Freeze()
-	return pqImportance
+	return &pqImportance
 }
 
 // Freeze Freeze graph. Should be called after contraction hierarchies had been prepared.
