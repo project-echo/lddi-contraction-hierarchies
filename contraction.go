@@ -21,7 +21,7 @@ func (graph *Graph) Preprocess(pqImportance *importanceHeap) {
 		vertex := heap.Pop(pqImportance).(*Vertex)
 		vertex.computeImportance()
 		if pqImportance.Len() != 0 && vertex.importance > pqImportance.Peek().importance {
-			pqImportance.Push(vertex)
+			heap.Push(pqImportance, vertex)
 			continue
 		}
 		vertex.orderPos = extractionOrder
