@@ -21,7 +21,7 @@ func (graph *Graph) Preprocess(pqImportance *importanceHeap) {
 		vertex := pqImportance.Peek()
 		oldimportance := vertex.importance
 		vertex.computeImportance()
-		if vertex.importance != oldimportance {
+		if vertex.importance > oldimportance {
 			heap.Fix(pqImportance, 0)
 			continue
 		}
