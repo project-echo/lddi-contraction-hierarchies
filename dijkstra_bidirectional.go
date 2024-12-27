@@ -33,13 +33,10 @@ func (graph *Graph) ShortestPath(source, target int64) (float64, []int64) {
 	return graph.shortestPath(endpoints)
 }
 
-func (graph *Graph) initShortestPath() (queryDist [directionsCount][]float64, processed [directionsCount][]bool, queues [directionsCount]*vertexDistHeap) {
+func (graph *Graph) initShortestPath() (queryDist [directionsCount]map[int64]float64, processed [directionsCount]map[int64]bool, queues [directionsCount]*vertexDistHeap) {
 	for d := forward; d < directionsCount; d++ {
-		queryDist[d] = make([]float64, len(graph.Vertices))
-		for i := range queryDist[d] {
-			queryDist[d][i] = Infinity
-		}
-		processed[d] = make([]bool, len(graph.Vertices))
+		queryDist[d] = make(map[int64]float64)
+		processed[d] = make(map[int64]bool)
 		queues[d] = &vertexDistHeap{}
 		heap.Init(queues[d])
 	}
@@ -60,7 +57,7 @@ func (graph *Graph) shortestPath(endpoints [directionsCount]int64) (float64, []i
 	return graph.shortestPathCore(queryDist, processed, queues)
 }
 
-func (graph *Graph) shortestPathCore(queryDist [directionsCount][]float64, processed [directionsCount][]bool, queues [directionsCount]*vertexDistHeap) (float64, []int64) {
+func (graph *Graph) shortestPathCore(queryDist [directionsCount]map[int64]float64, processed [directionsCount]map[int64]bool, queues [directionsCount]*vertexDistHeap) (float64, []int64) {
 	var prev [directionsCount]map[int64]int64
 	for d := forward; d < directionsCount; d++ {
 		prev[d] = make(map[int64]int64)
@@ -87,7 +84,7 @@ func (graph *Graph) shortestPathCore(queryDist [directionsCount][]float64, proce
 	return estimate, graph.ComputePath(middleID, prev[forward], prev[backward])
 }
 
-func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProcessed, reverseProcessed []bool, localQueryDist, reverseQueryDist []float64, prev map[int64]int64, estimate *float64, middleID *int64) {
+func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProcessed, reverseProcessed map[int64]bool, localQueryDist, reverseQueryDist map[int64]float64, prev map[int64]int64, estimate *float64, middleID *int64) {
 	vertex := heap.Pop(q).(*vertexDist)
 	if graph.Reporter != nil {
 		graph.Reporter.VertexSettled(int(d), 0, vertex.id, q.Len())
@@ -101,12 +98,22 @@ func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProce
 		} else {
 			vertexList = graph.Vertices[vertex.id].inIncidentEdges
 		}
+
+		distance, ok := localQueryDist[vertex.id]
+		if !ok {
+			distance = Infinity
+		}
+
 		for i := range vertexList {
 			temp := vertexList[i].vertexID
 			cost := vertexList[i].weight
+			alt := distance + cost
 			if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
-				alt := localQueryDist[vertex.id] + cost
-				if localQueryDist[temp] > alt {
+				localDist, ok := localQueryDist[temp]
+				if !ok {
+					localDist = Infinity
+				}
+				if localDist > alt {
 					if graph.Reporter != nil {
 						if graph.Reporter != nil {
 							graph.Reporter.EdgeRelaxed(int(d), 0, vertex.id, temp, true, q.Len())
@@ -124,9 +131,13 @@ func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProce
 		}
 	}
 	if reverseProcessed[vertex.id] {
-		if vertex.dist+reverseQueryDist[vertex.id] < *estimate {
+		reverseDist, ok := reverseQueryDist[vertex.id]
+		if !ok {
+			reverseDist = Infinity
+		}
+		if vertex.dist+reverseDist < *estimate {
 			*middleID = vertex.id
-			*estimate = vertex.dist + reverseQueryDist[vertex.id]
+			*estimate = vertex.dist + reverseDist
 			if graph.Reporter != nil {
 				graph.Reporter.FoundBetterPath(int(d), 0, 0, vertex.id, *estimate)
 			}
