@@ -152,7 +152,7 @@ func TestBadSpatialShortestPath(t *testing.T) {
 	t.Log("TestBadSpatialShortestPath is Ok!")
 }
 
-func TestLittleShortestPath(t *testing.T) {
+func makeLittleGraph() Graph {
 	g := Graph{}
 	g.CreateVertex(0)
 	g.CreateVertex(1)
@@ -184,6 +184,11 @@ func TestLittleShortestPath(t *testing.T) {
 	g.AddEdge(5, 6, 4.0)
 
 	g.PrepareContractionHierarchies()
+	return g
+}
+
+func TestLittleShortestPath(t *testing.T) {
+	g := makeLittleGraph()
 	t.Log("TestLittleShortestPath is starting...")
 	u := int64(0)
 	v := int64(7)
@@ -196,6 +201,38 @@ func TestLittleShortestPath(t *testing.T) {
 		t.Errorf("Length of path should be 20.0, but got %f", ans)
 	}
 	t.Log("TestLittleShortestPath is Ok!")
+}
+
+func TestLittleSameNodeShortestPath(t *testing.T) {
+	g := makeLittleGraph()
+	t.Log("TestLittleSameNodeShortestPath is starting...")
+	u := int64(0)
+	v := int64(0)
+	//
+	ans, path := g.ShortestPath(u, v)
+	if len(path) != 1 {
+		t.Errorf("Num of vertices in path should be 1, but got %d", len(path))
+	}
+	if Round(ans, 0.00005) != Round(0.0, 0.00005) {
+		t.Errorf("Length of path should be 0.0, but got %f", ans)
+	}
+	t.Log("TestLittleSameNodeShortestPath is Ok!")
+}
+
+func TestLittleOneStepShortestPath(t *testing.T) {
+	g := makeLittleGraph()
+	t.Log("TestLittleOneStepShortestPath is starting...")
+	u := int64(0)
+	v := int64(1)
+	//
+	ans, path := g.ShortestPath(u, v)
+	if len(path) != 2 {
+		t.Errorf("Num of vertices in path should be 2, but got %d", len(path))
+	}
+	if Round(ans, 0.00005) != Round(6.0, 0.00005) {
+		t.Errorf("Length of path should be 6.0, but got %f", ans)
+	}
+	t.Log("TestLittleOneStepShortestPath is Ok!")
 }
 
 func TestVertexAlternatives(t *testing.T) {
