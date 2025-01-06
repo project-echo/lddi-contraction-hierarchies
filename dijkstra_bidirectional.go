@@ -99,15 +99,10 @@ func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProce
 			vertexList = graph.Vertices[vertex.id].inIncidentEdges
 		}
 
-		distance, ok := localQueryDist[vertex.id]
-		if !ok {
-			distance = Infinity
-		}
-
 		for i := range vertexList {
 			temp := vertexList[i].vertexID
 			cost := vertexList[i].weight
-			alt := distance + cost
+			alt := vertex.dist + cost
 			if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
 				localDist, ok := localQueryDist[temp]
 				if !ok {
