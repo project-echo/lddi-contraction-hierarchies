@@ -46,7 +46,6 @@ func (graph *Graph) initShortestPath() (queryDist [directionsCount]map[int64]flo
 func (graph *Graph) shortestPath(endpoints [directionsCount]int64) (float64, []int64) {
 	queryDist, processed, queues := graph.initShortestPath()
 	for d := forward; d < directionsCount; d++ {
-		processed[d][endpoints[d]] = true
 		queryDist[d][endpoints[d]] = 0
 		heapEndpoint := &vertexDist{
 			id:   endpoints[d],
@@ -86,47 +85,46 @@ func (graph *Graph) shortestPathCore(queryDist [directionsCount]map[int64]float6
 
 func (graph *Graph) directionalSearch(d direction, q *vertexDistHeap, localProcessed, reverseProcessed map[int64]bool, localQueryDist, reverseQueryDist map[int64]float64, prev map[int64]int64, estimate *float64, middleID *int64) {
 	vertex := heap.Pop(q).(*vertexDist)
+	if vertex.dist >= *estimate {
+		return
+	}
+	if localProcessed[vertex.id] {
+		return
+	}
 	if graph.Reporter != nil {
 		graph.Reporter.VertexSettled(int(d), 0, vertex.id, q.Len())
 	}
-	if vertex.dist <= *estimate {
-		localProcessed[vertex.id] = true
-		// Edge relaxation in a forward propagation
-		var vertexList []incidentEdge
-		if d == forward {
-			vertexList = graph.Vertices[vertex.id].outIncidentEdges
-		} else {
-			vertexList = graph.Vertices[vertex.id].inIncidentEdges
-		}
+	localProcessed[vertex.id] = true
+	// Edge relaxation in a forward propagation
+	var vertexList []incidentEdge
+	if d == forward {
+		vertexList = graph.Vertices[vertex.id].outIncidentEdges
+	} else {
+		vertexList = graph.Vertices[vertex.id].inIncidentEdges
+	}
 
-		distance, ok := localQueryDist[vertex.id]
-		if !ok {
-			distance = Infinity
-		}
-
-		for i := range vertexList {
-			temp := vertexList[i].vertexID
-			cost := vertexList[i].weight
-			alt := distance + cost
-			if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
-				localDist, ok := localQueryDist[temp]
-				if !ok {
-					localDist = Infinity
-				}
-				if localDist > alt {
+	for i := range vertexList {
+		temp := vertexList[i].vertexID
+		cost := vertexList[i].weight
+		alt := vertex.dist + cost
+		if graph.Vertices[vertex.id].orderPos < graph.Vertices[temp].orderPos {
+			localDist, ok := localQueryDist[temp]
+			if !ok {
+				localDist = Infinity
+			}
+			if localDist > alt {
+				if graph.Reporter != nil {
 					if graph.Reporter != nil {
-						if graph.Reporter != nil {
-							graph.Reporter.EdgeRelaxed(int(d), 0, vertex.id, temp, true, q.Len())
-						}
+						graph.Reporter.EdgeRelaxed(int(d), 0, vertex.id, temp, true, q.Len())
 					}
-					localQueryDist[temp] = alt
-					prev[temp] = vertex.id
-					node := &vertexDist{
-						id:   temp,
-						dist: alt,
-					}
-					heap.Push(q, node)
 				}
+				localQueryDist[temp] = alt
+				prev[temp] = vertex.id
+				node := &vertexDist{
+					id:   temp,
+					dist: alt,
+				}
+				heap.Push(q, node)
 			}
 		}
 	}
@@ -169,7 +167,6 @@ func (graph *Graph) shortestPathWithAlternatives(endpoints [directionsCount][]ve
 			if endpoint.vertexNum == vertexNotFound {
 				continue
 			}
-			processed[d][endpoint.vertexNum] = true
 			queryDist[d][endpoint.vertexNum] = endpoint.additionalDistance
 			heapEndpoint := &vertexDist{
 				id:   endpoint.vertexNum,
