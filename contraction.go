@@ -18,12 +18,14 @@ func (graph *Graph) Preprocess(pqImportance *importanceHeap) {
 		// update Importance of vertex "on demand" as follows:
 		// Before contracting vertex with currently smallest Importance, recompute its Importance and see if it is still the smallest
 		// If not pick next smallest one, recompute its Importance and see if that is the smallest now; If not, continue in same way ...
-		vertex := heap.Pop(pqImportance).(*Vertex)
+		vertex := pqImportance.Peek()
+		oldimportance := vertex.importance
 		vertex.computeImportance()
-		if pqImportance.Len() != 0 && vertex.importance > pqImportance.Peek().importance {
-			pqImportance.Push(vertex)
+		if vertex.importance > oldimportance {
+			heap.Fix(pqImportance, 0)
 			continue
 		}
+		vertex = heap.Pop(pqImportance).(*Vertex)
 		vertex.orderPos = extractionOrder
 		graph.contractNode(vertex)
 		if graph.verbose {
