@@ -214,20 +214,21 @@ func (graph *Graph) ComputePath(middleID int64, forwardPrev, backwardPrev map[in
 	path = append(path, middleID)
 	path = append(path, backwardPath...)
 
-	// Expand shortcuts iteratively
+	// Expand shortcuts iteratively, reusing two buffers instead of allocating a fresh slice each time.
+	scratch := make([]int64, 0, pathLen*2)
 	for {
 		expanded := false
-		newPath := make([]int64, 0, len(path)*2)
+		scratch = scratch[:0]
 		for i := 0; i < len(path); i++ {
-			newPath = append(newPath, path[i])
+			scratch = append(scratch, path[i])
 			if i+1 < len(path) {
 				if shortcut, ok := graph.shortcuts[path[i]][path[i+1]]; ok {
-					newPath = append(newPath, shortcut.Via)
+					scratch = append(scratch, shortcut.Via)
 					expanded = true
 				}
 			}
 		}
-		path = newPath
+		path, scratch = scratch, path
 		if !expanded {
 			break
 		}
