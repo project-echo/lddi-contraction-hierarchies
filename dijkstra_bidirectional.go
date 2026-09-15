@@ -2,6 +2,7 @@ package ch
 
 import (
 	"container/heap"
+	"slices"
 )
 
 type direction int
@@ -179,65 +180,52 @@ func (graph *Graph) shortestPathWithAlternatives(endpoints [directionsCount][]ve
 
 // ComputePath Returns slice of IDs (user defined) of computed path
 func (graph *Graph) ComputePath(middleID int64, forwardPrev, backwardPrev map[int64]int64) []int64 {
-	// Build forward path (reversed, from middle to source)
-	forwardPath := make([]int64, 0, 16)
+	// Path in contracted space: source ... middle ... target.
+	// Forward chain is walked middle->source, so reverse it in place before appending the rest.
+	chPath := make([]int64, 0, 32)
 	u := middleID
 	for {
 		prev, ok := forwardPrev[u]
 		if !ok {
 			break
 		}
-		forwardPath = append(forwardPath, prev)
+		chPath = append(chPath, prev)
 		u = prev
 	}
-
-	// Build backward path (from middle to target)
-	backwardPath := make([]int64, 0, 16)
+	slices.Reverse(chPath)
+	chPath = append(chPath, middleID)
 	u = middleID
 	for {
 		next, ok := backwardPrev[u]
 		if !ok {
 			break
 		}
-		backwardPath = append(backwardPath, next)
+		chPath = append(chPath, next)
 		u = next
 	}
 
-	// Combine: reverse(forwardPath) + middle + backwardPath
-	pathLen := len(forwardPath) + 1 + len(backwardPath)
-	path := make([]int64, 0, pathLen)
-
-	// Append reversed forward path
-	for i := len(forwardPath) - 1; i >= 0; i-- {
-		path = append(path, forwardPath[i])
-	}
-	path = append(path, middleID)
-	path = append(path, backwardPath...)
-
-	// Expand shortcuts iteratively, reusing two buffers instead of allocating a fresh slice each time.
-	scratch := make([]int64, 0, pathLen*2)
-	for {
-		expanded := false
-		scratch = scratch[:0]
-		for i := 0; i < len(path); i++ {
-			scratch = append(scratch, path[i])
-			if i+1 < len(path) {
-				if shortcut, ok := graph.shortcuts[path[i]][path[i+1]]; ok {
-					scratch = append(scratch, shortcut.Via)
-					expanded = true
-				}
-			}
-		}
-		path, scratch = scratch, path
-		if !expanded {
-			break
-		}
+	// Unpack each contracted edge into original edges, appending straight into the output.
+	// 256 fits a typical expanded path on a road graph (~233 vertices measured); longer ones regrow.
+	path := make([]int64, 0, 256)
+	path = append(path, chPath[0])
+	for i := 0; i+1 < len(chPath); i++ {
+		graph.unpackEdge(chPath[i], chPath[i+1], &path)
 	}
 
 	// Convert internal IDs to user labels
 	for i := range path {
 		path[i] = graph.Vertices[path[i]].Label
 	}
-
 	return path
+}
+
+// unpackEdge appends the original-edge vertices of the edge u->v to out, excluding u itself.
+// A shortcut u->v via w is unpacked as u->w followed by w->v, recursively.
+func (graph *Graph) unpackEdge(u, v int64, out *[]int64) {
+	if shortcut, ok := graph.shortcuts[u][v]; ok {
+		graph.unpackEdge(u, shortcut.Via, out)
+		graph.unpackEdge(shortcut.Via, v, out)
+		return
+	}
+	*out = append(*out, v)
 }
