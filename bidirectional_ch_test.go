@@ -425,3 +425,59 @@ func generateSyntheticGraph(verticesNum int) (*Graph, error) {
 	graph.PrepareContractionHierarchies()
 	return &graph, nil
 }
+
+// realEdgeBetween reports whether an original (non-shortcut) edge u->v exists.
+// Internal IDs, not user labels.
+func realEdgeBetween(g *Graph, u, v int64) bool {
+	for _, e := range g.Vertices[u].outIncidentEdges {
+		if e.vertexID == v && !e.isShortcut {
+			return true
+		}
+	}
+	return false
+}
+
+// checkExpandedPath asserts that every consecutive pair of the path is joined by an
+// original edge. A path that kept a shortcut, dropped a vertex or emitted the vertices
+// out of order breaks this, while the vertex count and the cost can all stay correct.
+func checkExpandedPath(t *testing.T, g *Graph, path []int64, what string) {
+	t.Helper()
+	for i := 0; i+1 < len(path); i++ {
+		u, okU := g.mapping[path[i]]
+		v, okV := g.mapping[path[i+1]]
+		if !okU || !okV {
+			t.Fatalf("%s: path[%d]=%d or path[%d]=%d is not a known vertex", what, i, path[i], i+1, path[i+1])
+		}
+		if !realEdgeBetween(g, u, v) {
+			t.Fatalf("%s: no original edge between path[%d]=%d and path[%d]=%d",
+				what, i, path[i], i+1, path[i+1])
+		}
+	}
+}
+
+func TestExpandedPathIsRealEdgeWalk(t *testing.T) {
+	g := Graph{}
+	if err := graphFromCSV(&g, "./data/pgrouting_osm.csv"); err != nil {
+		t.Fatal(err)
+	}
+	g.PrepareContractionHierarchies()
+
+	if _, path := g.ShortestPath(69618, 5924); len(path) < 2 {
+		t.Fatalf("expected a multi-vertex path, got %d vertices", len(path))
+	} else {
+		checkExpandedPath(t, &g, path, "ShortestPath")
+	}
+
+	sources := []int64{106600, 69618, 68427}
+	targets := []int64{5924, 81611, 68490}
+	costs, paths := g.ShortestPathManyToMany(sources, targets)
+	for s := range paths {
+		for target := range paths[s] {
+			if costs[s][target] == -1 {
+				continue
+			}
+			checkExpandedPath(t, &g, paths[s][target],
+				fmt.Sprintf("ShortestPathManyToMany[%d][%d]", s, target))
+		}
+	}
+}
