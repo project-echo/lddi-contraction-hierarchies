@@ -2,7 +2,7 @@ package ch
 
 import (
 	"container/heap"
-	"container/list"
+	"slices"
 )
 
 type direction int
@@ -180,40 +180,52 @@ func (graph *Graph) shortestPathWithAlternatives(endpoints [directionsCount][]ve
 
 // ComputePath Returns slice of IDs (user defined) of computed path
 func (graph *Graph) ComputePath(middleID int64, forwardPrev, backwardPrev map[int64]int64) []int64 {
-	l := list.New()
-	l.PushBack(middleID)
+	// Path in contracted space: source ... middle ... target.
+	// Forward chain is walked middle->source, so reverse it in place before appending the rest.
+	chPath := make([]int64, 0, 32)
 	u := middleID
-	var ok bool
 	for {
-		if u, ok = forwardPrev[u]; ok {
-			l.PushFront(u)
-		} else {
+		prev, ok := forwardPrev[u]
+		if !ok {
 			break
 		}
+		chPath = append(chPath, prev)
+		u = prev
 	}
+	slices.Reverse(chPath)
+	chPath = append(chPath, middleID)
 	u = middleID
 	for {
-		if u, ok = backwardPrev[u]; ok {
-			l.PushBack(u)
-		} else {
+		next, ok := backwardPrev[u]
+		if !ok {
 			break
 		}
-	}
-	ok = true
-	for ok {
-		ok = false
-		for e := l.Front(); e.Next() != nil; e = e.Next() {
-			if contractedNode, ok2 := graph.shortcuts[e.Value.(int64)][e.Next().Value.(int64)]; ok2 {
-				ok = true
-				l.InsertAfter(contractedNode.Via, e)
-			}
-		}
+		chPath = append(chPath, next)
+		u = next
 	}
 
-	var path = make([]int64, 0, l.Len())
-	for e := l.Front(); e != nil; e = e.Next() {
-		path = append(path, graph.Vertices[e.Value.(int64)].Label)
+	// Unpack each contracted edge into original edges, appending straight into the output.
+	// 256 fits a typical expanded path on a road graph (~233 vertices measured); longer ones regrow.
+	path := make([]int64, 0, 256)
+	path = append(path, chPath[0])
+	for i := 0; i+1 < len(chPath); i++ {
+		graph.unpackEdge(chPath[i], chPath[i+1], &path)
 	}
 
+	// Convert internal IDs to user labels
+	for i := range path {
+		path[i] = graph.Vertices[path[i]].Label
+	}
 	return path
+}
+
+// unpackEdge appends the original-edge vertices of the edge u->v to out, excluding u itself.
+// A shortcut u->v via w is unpacked as u->w followed by w->v, recursively.
+func (graph *Graph) unpackEdge(u, v int64, out *[]int64) {
+	if shortcut, ok := graph.shortcuts[u][v]; ok {
+		graph.unpackEdge(u, shortcut.Via, out)
+		graph.unpackEdge(shortcut.Via, v, out)
+		return
+	}
+	*out = append(*out, v)
 }
